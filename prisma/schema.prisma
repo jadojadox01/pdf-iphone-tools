@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../data/cms.db"
+}
+
+model Author {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  bio       String   @default("")
+  role      String   @default("")
+  avatarId  String?
+  website   String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  guides    Guide[]
+  avatar    Media?   @relation("AuthorAvatar", fields: [avatarId], references: [id])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String   @default("")
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  guides      Guide[]
+}
+
+model Tag {
+  id     String     @id @default(cuid())
+  name   String
+  slug   String     @unique
+  guides GuideTag[]
+}
+
+model Media {
+  id          String   @id @default(cuid())
+  filename    String
+  mimeType    String
+  alt         String   @default("")
+  caption     String   @default("")
+  width       Int?
+  height      Int?
+  size        Int      @default(0)
+  data        Bytes
+  createdAt   DateTime @default(now())
+  featuredFor Guide[]  @relation("FeaturedImage")
+  ogFor       Guide[]  @relation("OgImage")
+  authors     Author[] @relation("AuthorAvatar")
+}
+
+model Guide {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  excerpt         String    @default("")
+  contentJson     String    @default("{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\"}]}")
+  searchText      String    @default("")
+  status          String    @default("draft")
+  featured        Boolean   @default(false)
+  publishedAt     DateTime?
+  scheduledAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  readingTime     Int       @default(1)
+  seoTitle        String    @default("")
+  seoDescription  String    @default("")
+  canonicalUrl    String    @default("")
+  robots          String    @default("index,follow")
+  focusTopic      String    @default("")
+  featuredImageId String?
+  ogImageId       String?
+  authorId        String?
+  categoryId      String?
+
+  author         Author?          @relation(fields: [authorId], references: [id])
+  category       Category?        @relation(fields: [categoryId], references: [id])
+  featuredImage  Media?           @relation("FeaturedImage", fields: [featuredImageId], references: [id])
+  ogImage        Media?           @relation("OgImage", fields: [ogImageId], references: [id])
+  tags           GuideTag[]
+  relatedTools   GuideTool[]
+  relatedFrom    GuideRelation[]  @relation("FromGuide")
+  relatedTo      GuideRelation[]  @relation("ToGuide")
+  revisions      GuideRevision[]
+}
+
+model GuideTag {
+  guideId String
+  tagId   String
+  guide   Guide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  tag     Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([guideId, tagId])
+}
+
+model GuideTool {
+  guideId  String
+  toolSlug String
+  guide    Guide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@id([guideId, toolSlug])
+}
+
+model GuideRelation {
+  fromId String
+  toId   String
+  from   Guide @relation("FromGuide", fields: [fromId], references: [id], onDelete: Cascade)
+  to     Guide @relation("ToGuide", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@id([fromId, toId])
+}
+
+model GuideRevision {
+  id          String   @id @default(cuid())
+  guideId     String
+  title       String
+  excerpt     String   @default("")
+  contentJson String
+  createdAt   DateTime @default(now())
+  guide       Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+}
+
+model Setting {
+  key   String @id
+  value String
+}
