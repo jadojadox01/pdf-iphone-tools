@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { uploadAdminMedia } from "@/lib/prepare-media-upload";
 
 export default function MediaPicker({ value, onChange, label = "Image" }) {
   const [items, setItems] = useState([]);
@@ -8,6 +9,7 @@ export default function MediaPicker({ value, onChange, label = "Image" }) {
   const [q, setQ] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const inputRef = useRef(null);
 
   function load(query = q) {
     const params = query ? `?q=${encodeURIComponent(query)}` : "";
@@ -30,19 +32,16 @@ export default function MediaPicker({ value, onChange, label = "Image" }) {
     if (!file) return;
     setBusy(true);
     setError("");
-    const body = new FormData();
-    body.append("file", file);
-    body.append("alt", file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " "));
-    const response = await fetch("/api/admin/media", { method: "POST", body });
-    const data = await response.json().catch(() => ({}));
-    setBusy(false);
-    if (!response.ok) {
-      setError(data.error || "Upload failed.");
-      return;
+    try {
+      const media = await uploadAdminMedia(file);
+      onChange(media.id);
+      setItems((current) => [media, ...current.filter((item) => item.id !== media.id)]);
+      setOpen(false);
+    } catch (uploadError) {
+      setError(uploadError?.message || "Upload failed. Try a JPEG or PNG under 8 MB.");
+    } finally {
+      setBusy(false);
     }
-    onChange(data.media.id);
-    setItems((current) => [data.media, ...current.filter((item) => item.id !== data.media.id)]);
-    setOpen(false);
   }
 
   return (
@@ -57,10 +56,22 @@ export default function MediaPicker({ value, onChange, label = "Image" }) {
       )}
       {error ? <p className="alert alert-error">{error}</p> : null}
       <div className="hero-actions">
-        <label className="btn btn-primary">
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/svg+xml,.jpg,.jpeg,.png,.webp,.gif,.svg"
+          className="sr-only"
+          onChange={onUpload}
+          disabled={busy}
+        />
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={busy}
+          onClick={() => inputRef.current?.click()}
+        >
           {busy ? "Uploading…" : "Upload image"}
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" hidden onChange={onUpload} disabled={busy} />
-        </label>
+        </button>
         <button type="button" className="btn btn-secondary" onClick={() => setOpen((current) => !current)}>
           {open ? "Close library" : "Choose from library"}
         </button>

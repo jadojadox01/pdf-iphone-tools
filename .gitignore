@@ -38,6 +38,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# generated media copies (canonical bytes live in the CMS database)
+/public/uploads/media/*
+!/public/uploads/media/.gitkeep
+
 # OCR engine assets (copied on postinstall)
 /public/tesseract/*.wasm
 /public/tesseract/*.wasm.js

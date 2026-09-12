@@ -15,6 +15,7 @@ import { Callout, FaqItem, ToolCta, ButtonLink, Example, ProsCons, Diagram, Sour
 import { WordText, HighlightMark, BlockLayout } from "@/lib/cms/word-marks";
 import { emptyDoc } from "@/lib/cms/tiptap";
 import { getTools } from "@/lib/tools";
+import { uploadAdminMedia } from "@/lib/prepare-media-upload";
 
 const CaptionedImage = Image.extend({
   addAttributes() {
@@ -160,23 +161,21 @@ export default function TiptapEditor({ value, onChange }) {
   if (!editor) return <p className="help">Loading editor…</p>;
 
   async function uploadImage(file) {
-    const body = new FormData();
-    body.append("file", file);
-    body.append("alt", file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " "));
-    const response = await fetch("/api/admin/media", { method: "POST", body });
-    const data = await response.json();
-    if (!response.ok) {
-      window.alert(data.error || "Image upload failed.");
+    let media;
+    try {
+      media = await uploadAdminMedia(file);
+    } catch (error) {
+      window.alert(error?.message || "Image upload failed.");
       return;
     }
-    const alt = window.prompt("Alt text — describe what the picture shows", data.media.alt || "") || data.media.alt || "";
-    const caption = window.prompt("Caption (optional)", data.media.caption || "") || "";
+    const alt = window.prompt("Alt text — describe what the picture shows", media.alt || "") || media.alt || "";
+    const caption = window.prompt("Caption (optional)", media.caption || "") || "";
     const annotation = window.prompt("Label on the picture (optional), e.g. Files → Downloads", "") || "";
     const credit = window.prompt("Source/credit if this is not your screenshot (optional)", "") || "";
     const image = {
       type: "image",
       attrs: {
-        src: data.media.url,
+        src: media.url,
         alt,
         caption,
         annotation,

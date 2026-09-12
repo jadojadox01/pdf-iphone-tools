@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { uploadAdminMedia } from "@/lib/prepare-media-upload";
 
 export default function AdminMediaPage() {
   const [media, setMedia] = useState([]);
@@ -25,20 +26,15 @@ export default function AdminMediaPage() {
     setError("");
     const file = event.target.file.files?.[0];
     if (!file) return;
-    const body = new FormData();
-    body.append("file", file);
-    body.append("alt", alt);
-    body.append("caption", caption);
-    const response = await fetch("/api/admin/media", { method: "POST", body });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      setError(data.error || "Upload failed.");
-      return;
+    try {
+      await uploadAdminMedia(file, { alt, caption });
+      setAlt("");
+      setCaption("");
+      event.target.reset();
+      load();
+    } catch (uploadError) {
+      setError(uploadError?.message || "Upload failed. Try a JPEG or PNG under 8 MB.");
     }
-    setAlt("");
-    setCaption("");
-    event.target.reset();
-    load();
   }
 
   async function save(item) {
@@ -59,12 +55,12 @@ export default function AdminMediaPage() {
   return (
     <div className="admin-page">
       <h1>Media</h1>
-      <p className="help">JPEG, PNG, WebP, GIF, or SVG. Maximum 4 MB. Use a real screenshot or a clearly designed diagram.</p>
+      <p className="help">JPEG, PNG, WebP, GIF, or SVG. Maximum 8 MB. Use a real screenshot or a clearly designed diagram.</p>
       {error && <div className="alert alert-error">{error}</div>}
       <form className="workspace" onSubmit={upload}>
         <label className="field">
           File
-          <input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" required />
+          <input name="file" type="file" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/svg+xml,.jpg,.jpeg,.png,.webp,.gif,.svg" required />
         </label>
         <label className="field">
           Alt text

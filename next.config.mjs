@@ -27,6 +27,9 @@ const nextConfig = {
   trailingSlash: false,
   serverExternalPackages: ["exceljs", "@prisma/client", "tesseract.js"],
   transpilePackages: ["pdfjs-dist", "heic2any"],
+  experimental: {
+    proxyClientMaxBodySize: "10mb",
+  },
   outputFileTracingIncludes: {
     "/*": ["./data/cms.db", "./prisma/**/*"],
     "/guides/**": ["./data/cms.db"],

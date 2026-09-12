@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { adminGuard } from "@/lib/admin-guard";
-import { serializeMedia } from "@/lib/media-store";
+import { serializeMedia, removePersistedMediaFile } from "@/lib/media-store";
 
 export async function PATCH(request, { params }) {
   const denied = await adminGuard();
@@ -26,5 +26,6 @@ export async function DELETE(request, { params }) {
   await prisma.guide.updateMany({ where: { ogImageId: id }, data: { ogImageId: null } });
   await prisma.author.updateMany({ where: { avatarId: id }, data: { avatarId: null } });
   await prisma.media.delete({ where: { id } });
+  await removePersistedMediaFile(id);
   return NextResponse.json({ ok: true });
 }
