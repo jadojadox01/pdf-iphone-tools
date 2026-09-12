@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { adminGuard } from "@/lib/admin-guard";
+import { runningOnVercel } from "@/lib/cms-storage";
 import {
   ALLOWED_MEDIA_TYPES,
   MAX_MEDIA_BYTES,
@@ -84,7 +85,7 @@ export async function POST(request) {
         alt: String(form.get("alt") || "").trim(),
         caption: String(form.get("caption") || "").trim(),
         size: bytes.length,
-        data: bytes,
+        data: runningOnVercel() ? undefined : bytes,
       },
     });
     const url = await persistMediaFile(created.id, bytes, mimeType, file.name);
