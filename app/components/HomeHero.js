@@ -65,7 +65,7 @@ export default function HomeHero() {
               ))}
             </div>
           )}
-          <p className="help">Files are processed in your browser. They are not uploaded to our servers.</p>
+          <p className="help">Your file is processed locally in your browser and is not uploaded to PDFFlow&apos;s servers for normal tool processing.</p>
         </div>
       </div>
     </section>

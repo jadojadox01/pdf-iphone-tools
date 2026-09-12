@@ -5,7 +5,7 @@ import ToolExplain from "../../components/ToolExplain";
 import JsonLd, { breadcrumbJsonLd, definedTermJsonLd, faqJsonLd } from "../../components/JsonLd";
 import { getRelatedTools, getTool } from "@/lib/tools";
 import { toolMetadata } from "@/lib/seo";
-import { getPublishedDevice, serializeGuideCard } from "@/lib/cms/guides";
+import { getPublishedDevice } from "@/lib/cms/guides";
 import { hasDeviceToolPage, IPHONE_TOOL_PAGES, toolPath } from "@/lib/paths";
 import { getIphoneToolCopy } from "@/lib/devices";
 import { loadRelatedGuides, loadToolExplain } from "@/lib/explain-load";
@@ -80,11 +80,11 @@ export default async function IphoneToolPage({ params }) {
       ) : null}
       <p className="lede">{intro}</p>
       <ToolWorkspace tool={tool} />
-      <p className="help">The file is processed in Safari on this iPhone. It is not uploaded for conversion.</p>
+      <p className="help">Your file is processed locally in this browser and is not uploaded to PDFFlow&apos;s servers for normal tool processing.</p>
       <ToolExplain
         explain={explain}
         related={relatedTools}
-        relatedGuides={linked.map(serializeGuideCard)}
+        relatedGuides={linked}
         device="iphone"
       />
       <AdRegion pageType="tool" slot="after-tool-explain" />

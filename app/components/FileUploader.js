@@ -16,7 +16,7 @@ export default function FileUploader({
   const inputRef = useRef(null);
   const [drag, setDrag] = useState(false);
   const help =
-    hint || "Files up to 25 MB. Processed in your browser — nothing is uploaded to our servers.";
+    hint || "Files up to 25 MB. Processed locally in your browser — not uploaded to PDFFlow's servers for normal tool processing.";
 
   function addFiles(list) {
     const incoming = Array.from(list || []);

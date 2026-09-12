@@ -149,7 +149,7 @@ export default async function HomePage() {
                 <Icon name="file" />
               </span>
               <h3>Choose your PDF</h3>
-              <p>The file is processed in your browser. It is not uploaded for conversion.</p>
+              <p>Your file is processed locally in your browser and is not uploaded to PDFFlow&apos;s servers for normal tool processing.</p>
             </div>
             <div className="step">
               <span className="tool-icon" aria-hidden="true">

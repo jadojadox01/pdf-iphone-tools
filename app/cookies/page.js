@@ -12,7 +12,7 @@ export default function CookiesPage() {
   return (
     <div className="wrap prose" style={{ padding: "32px 0 64px" }}>
       <h1>Cookie Policy</h1>
-      <p>Last updated: 11 September 2026</p>
+      <p>Last updated: 12 September 2026</p>
       <p>
         This page lists cookies this website actually uses. PDF files are processed in your browser
         and are not stored in cookies. The PDF tools work if you decline analytics.
@@ -25,12 +25,18 @@ export default function CookiesPage() {
       <h2>Cookies this site sets</h2>
       <div className="legal-table-wrap">
         <table className="legal-table">
+          <colgroup>
+            <col className="legal-col-name" />
+            <col className="legal-col-purpose" />
+            <col className="legal-col-duration" />
+            <col className="legal-col-type" />
+          </colgroup>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Purpose</th>
-              <th>Duration</th>
-              <th>Type</th>
+              <th scope="col">Name</th>
+              <th scope="col">Purpose</th>
+              <th scope="col">Duration</th>
+              <th scope="col">Type</th>
             </tr>
           </thead>
           <tbody>
@@ -67,9 +73,10 @@ export default function CookiesPage() {
         Analytics scripts load only after you accept. If you decline, they are not loaded. Your
         choice is stored in this browser’s local storage (not as a cookie) under{" "}
         <code>pdfflow-analytics</code>. When the script loads, advertising storage stays denied.
-        This site’s own banner is not a Google-certified consent management platform. A certified
-        platform is required before Google ads can be shown to visitors in the EEA, the UK, or
-        Switzerland.
+        This site’s own banner is not a Google-certified consent management platform. Before serving
+        personalized Google ads to visitors in the EEA, the UK, or Switzerland, Google requires
+        publishers to use a Google-certified consent management platform (CMP) integrated with the
+        IAB Transparency and Consent Framework. PDFFlow does not currently show ads.
       </p>
 
       <h2>What we do not use</h2>

@@ -770,12 +770,31 @@ h2 {
 .legal-table-wrap {
   overflow-x: auto;
   margin: 1.2em 0;
+  max-width: 100%;
 }
 
 .legal-table {
   width: 100%;
+  min-width: 40rem;
   border-collapse: collapse;
+  table-layout: fixed;
   font-size: 0.95rem;
+}
+
+.legal-table .legal-col-name {
+  width: 18%;
+}
+
+.legal-table .legal-col-purpose {
+  width: 46%;
+}
+
+.legal-table .legal-col-duration {
+  width: 14%;
+}
+
+.legal-table .legal-col-type {
+  width: 22%;
 }
 
 .legal-table th,
@@ -784,6 +803,20 @@ h2 {
   vertical-align: top;
   border: 1px solid var(--line);
   padding: 10px 12px;
+}
+
+.legal-table th:nth-child(1),
+.legal-table td:nth-child(1),
+.legal-table th:nth-child(3),
+.legal-table td:nth-child(3),
+.legal-table th:nth-child(4),
+.legal-table td:nth-child(4) {
+  white-space: nowrap;
+}
+
+.legal-table th:nth-child(2),
+.legal-table td:nth-child(2) {
+  overflow-wrap: anywhere;
 }
 
 .legal-table th {

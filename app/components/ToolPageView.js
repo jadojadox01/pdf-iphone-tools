@@ -41,7 +41,7 @@ export default function ToolPageView({ tool, explain, relatedGuides = [] }) {
       )}
 
       <ToolWorkspace tool={tool} />
-      <p className="help">The file is processed in this browser tab. It is not uploaded for conversion.</p>
+      <p className="help">Your file is processed locally in your browser and is not uploaded to PDFFlow&apos;s servers for normal tool processing.</p>
 
       <ToolExplain explain={explain} related={related} relatedGuides={relatedGuides} />
       <AdRegion pageType="tool" slot="after-tool-explain" />

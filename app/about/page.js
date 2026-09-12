@@ -16,7 +16,7 @@ export default function AboutPage() {
         {SITE_NAME} is a set of PDF tools that run in your browser. You can convert a PDF to Word, JPG, Excel, PowerPoint, or EPUB, and merge, split, compress, rotate, sign, or password-protect a file.
       </p>
       <p>
-        The site exists because those jobs are awkward on a phone, especially in Safari on iPhone. You should not need another app, and the file should not have to leave your device for conversion.
+        The site exists because those jobs are awkward on a phone, especially in Safari on iPhone. You should not need another app for conversion.
       </p>
       <p>
         This website is run by the person you can reach at{" "}
@@ -28,7 +28,7 @@ export default function AboutPage() {
         Each listed tool returns a downloadable file, or a message if that PDF cannot be processed. Scanned pages can use OCR in the browser for Word, Excel, and eBook. That is slower. Check names, numbers, and tables in the result.
       </p>
       <p>
-        Files are processed on your device. They are not uploaded to our servers for conversion, and we do not keep copies of your documents.
+        Your file is processed locally in your browser and is not uploaded to PDFFlow&apos;s servers for normal tool processing. PDFFlow does not keep copies of those files as part of normal tool processing.
       </p>
       <h2>Guides</h2>
       <p>

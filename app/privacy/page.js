@@ -4,7 +4,7 @@ import { CONTACT_EMAIL, CONTACT_WHATSAPP, CONTACT_WHATSAPP_URL, SITE_NAME } from
 
 export const metadata = pageMetadata({
   title: "Privacy Policy",
-  description: `How ${SITE_NAME} handles files, page visits, and cookies. PDF conversion runs in your browser and is not uploaded to our servers.`,
+  description: `How ${SITE_NAME} handles files, page visits, and cookies. PDF tools process files locally in your browser and do not upload them to PDFFlow's servers for normal tool processing.`,
   path: "/privacy",
 });
 
@@ -12,7 +12,7 @@ export default function PrivacyPage() {
   return (
     <div className="wrap prose" style={{ padding: "32px 0 64px" }}>
       <h1>Privacy Policy</h1>
-      <p>Last updated: 11 September 2026</p>
+      <p>Last updated: 12 September 2026</p>
       <p>
         This policy describes how {SITE_NAME} actually works. It is written for a small independent
         website, not a large company. We do not claim certifications, offices, or staff that we do
@@ -29,10 +29,9 @@ export default function PrivacyPage() {
 
       <h2>PDF files you convert</h2>
       <p>
-        Every PDF tool on this site runs in your browser. The PDF you choose is not uploaded to our
-        servers for conversion, merge, split, compression, rotation, signing, password protection,
-        unlocking, or OCR. We do not receive a copy of that file, we cannot read it, and we do not
-        store it.
+        Every PDF tool on this site runs in your browser. The PDF is processed locally in your
+        browser and is not intentionally uploaded to PDFFlow&apos;s servers for conversion. PDFFlow
+        does not receive or store a copy of the PDF as part of normal tool processing.
       </p>
       <p>
         Processing happens in the current browser tab. The result is a download created on your
@@ -120,8 +119,9 @@ export default function PrivacyPage() {
 
       <h2>Advertising</h2>
       <p>
-        This site does not show ads. Before Google ads are shown to visitors in the EEA, the UK, or Switzerland, a
-        Google-certified consent management platform is required, and this policy will be updated.
+        Before serving personalized Google ads to visitors in the EEA, the UK, or Switzerland, Google requires
+        publishers to use a Google-certified consent management platform (CMP) integrated with the IAB
+        Transparency and Consent Framework. PDFFlow does not currently show ads.
       </p>
 
       <h2>Questions</h2>

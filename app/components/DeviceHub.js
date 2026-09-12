@@ -122,7 +122,7 @@ export async function DeviceHub({ slug }) {
             </details>
             <details>
               <summary>Are my files uploaded?</summary>
-              <p>No. Processing runs in the browser. We cannot read the PDF.</p>
+              <p>No. Your file is processed locally in your browser and is not uploaded to PDFFlow&apos;s servers for normal tool processing.</p>
             </details>
           </div>
         </section>

@@ -20,7 +20,7 @@ export default function Footer({ publishedDeviceSlugs = [] }) {
             <img src={BRAND.logoSrc} alt={BRAND.name} className="logo-img logo-img-footer" width="168" height="48" />
           </Link>
           <p>{BRAND.tagline}</p>
-          <p>{BRAND.shortTagline} Processing runs in your browser. Files are not uploaded for conversion.</p>
+          <p>{BRAND.shortTagline} Your file is processed locally in your browser and is not uploaded to PDFFlow&apos;s servers for normal tool processing.</p>
           <p>
             <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           </p>

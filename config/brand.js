@@ -3,7 +3,7 @@ export const BRAND = {
   tagline: process.env.NEXT_PUBLIC_SITE_TAGLINE || "Simple PDF tools for every device.",
   shortTagline: "Convert, merge, split, compress, and manage PDFs directly from your browser.",
   definition:
-    "PDFFlow is a website of PDF tools that run in your browser. You can convert a PDF to Word, JPG, PNG, Excel, PowerPoint, or EPUB, turn Word files and photos into PDF, and merge, split, compress, rotate, sign, or password-protect a file. Processing stays on your device. Files are not uploaded for conversion.",
+    "PDFFlow is a website of PDF tools that run in your browser. You can convert a PDF to Word, JPG, PNG, Excel, PowerPoint, or EPUB, turn Word files and photos into PDF, and merge, split, compress, rotate, sign, or password-protect a file. Your file is processed locally in your browser and is not uploaded to PDFFlow's servers for normal tool processing.",
   url: (process.env.NEXT_PUBLIC_SITE_URL || "https://pdftoword-ten.vercel.app").replace(/\/$/, ""),
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "techpreneur3@gmail.com",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || "+250 786328597",
