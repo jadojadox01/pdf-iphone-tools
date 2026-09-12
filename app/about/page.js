@@ -1,11 +1,10 @@
 import { pageMetadata } from "@/lib/seo";
-import { SITE_NAME } from "@/lib/site";
+import { CONTACT_EMAIL, CONTACT_WHATSAPP, CONTACT_WHATSAPP_URL, SITE_NAME } from "@/lib/site";
 import Link from "next/link";
 
 export const metadata = pageMetadata({
-  title: "About PDF iPhone Tools",
-  description:
-    "PDF iPhone Tools is a free browser-based PDF utility. Convert, merge, compress, split, sign, and protect PDFs without installing an app.",
+  title: `About ${SITE_NAME}`,
+  description: `${SITE_NAME} is a set of PDF tools that run in your browser. Convert, merge, split, compress, sign, and protect files without installing an app.`,
   path: "/about",
 });
 
@@ -14,24 +13,26 @@ export default function AboutPage() {
     <div className="wrap prose" style={{ padding: "32px 0 64px" }}>
       <h1>About</h1>
       <p>
-        {SITE_NAME} is a free PDF utility that runs in the browser. It exists because many people — especially iPhone users in Safari — need to convert or tidy a PDF without installing another app.
+        {SITE_NAME} is a set of PDF tools that run in your browser. You can convert a PDF to Word, JPG, Excel, PowerPoint, or EPUB, and merge, split, compress, rotate, sign, or password-protect a file.
       </p>
       <p>
-        The product is operated by the team behind this website. Guides are published under the {SITE_NAME} byline unless a real person is named as the author. We do not invent staff names, user counts, or testimonials.
+        The site exists because those jobs are awkward on a phone, especially in Safari on iPhone. You should not need another app, and the file should not have to leave your device for conversion.
       </p>
-      <h2>What you can do</h2>
       <p>
-        Convert PDFs to Word, JPG, Excel, PowerPoint, or EPUB. Merge, split, compress, rotate, sign, password-protect, or unlock a PDF when you already know the password. Every listed tool is meant to return a real file, or an honest error if the PDF cannot be processed.
+        This website is run by the person you can reach at{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> or on WhatsApp at{" "}
+        <a href={CONTACT_WHATSAPP_URL}>{CONTACT_WHATSAPP}</a>. There is no office address listed here.
+      </p>
+      <h2>What the tools do</h2>
+      <p>
+        Each listed tool returns a downloadable file, or a message if that PDF cannot be processed. Scanned pages can use OCR in the browser for Word, Excel, and eBook. That is slower. Check names, numbers, and tables in the result.
       </p>
       <p>
         Files are processed on your device. They are not uploaded to our servers for conversion, and we do not keep copies of your documents.
       </p>
       <h2>Guides</h2>
       <p>
-        The <Link href="/guides">Guides</Link> section explains how to use these tools for common tasks, including iPhone workflows. Articles are written and published from an editorial dashboard. We prefer fewer, useful guides over keyword pages.
-      </p>
-      <p>
-        Questions can be sent from the <Link href="/contact">contact page</Link>. Privacy and terms are published at <Link href="/privacy">Privacy Policy</Link> and <Link href="/terms">Terms of Service</Link>.
+        The <Link href="/guides">guides</Link> explain how to use the tools for common tasks. Questions can be sent from the <Link href="/contact">contact page</Link>. See also the <Link href="/privacy">Privacy Policy</Link> and <Link href="/terms">Terms of Service</Link>.
       </p>
     </div>
   );

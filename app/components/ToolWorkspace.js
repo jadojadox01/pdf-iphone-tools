@@ -39,7 +39,8 @@ export default function ToolWorkspace({ tool }) {
     };
   }, [result]);
 
-  const canRun = tool.multiple ? files.length >= 2 : files.length === 1;
+  const minFiles = Number(tool.minFiles || (tool.multiple ? 2 : 1));
+  const canRun = files.length >= minFiles;
 
   function resetAll() {
     if (result?.url) revokeUrl(result.url);
@@ -78,7 +79,7 @@ export default function ToolWorkspace({ tool }) {
       <div className="workspace">
         {!files.length || result ? (
           <>
-            <FileUploader files={files} onFiles={setFiles} />
+            <FileUploader files={files} onFiles={setFiles} onError={setError} />
             {result && (
               <ResultPanel
                 result={result}
@@ -106,6 +107,12 @@ export default function ToolWorkspace({ tool }) {
     <div className="workspace">
       <h2 style={{ marginTop: 0 }}>{tool.cta}</h2>
       <p className="help">{tool.afterUpload}</p>
+      {(tool.slug === "pdf-to-word" || tool.slug === "pdf-to-excel" || tool.slug === "pdf-to-ebook") && (
+        <div className="alert alert-info">
+          <strong>Scanned pages</strong>
+          If a page has little or no embedded text, OCR runs in your browser. That is slower on iPhone, and English printed text works best. Check the download.
+        </div>
+      )}
 
       <FileUploader
         files={files}
@@ -114,8 +121,12 @@ export default function ToolWorkspace({ tool }) {
           setResult(null);
           setError(null);
         }}
+        onError={setError}
         multiple={tool.multiple}
-        label={tool.multiple ? "Add PDFs" : "Choose PDF"}
+        accept={tool.accept}
+        label={tool.chooseLabel || (tool.multiple ? "Add files" : "Choose file")}
+        dropTitle={tool.dropTitle}
+        hint={tool.pickerHint}
       />
 
       {canRun && !result && (
@@ -145,7 +156,7 @@ export default function ToolWorkspace({ tool }) {
       {busy && (
         <div className="status-panel" aria-live="polite">
           <div className="spinner" aria-hidden="true" />
-          <strong>{status || "Processing PDF…"}</strong>
+          <strong>{status || "Processing…"}</strong>
           <p className="help">Keep this page open until the file is ready.</p>
         </div>
       )}
@@ -172,7 +183,7 @@ export default function ToolWorkspace({ tool }) {
 function OptionsPanel({ tool, options, setOptions }) {
   const set = (key, value) => setOptions((current) => ({ ...current, [key]: value }));
 
-  if (tool.slug === "pdf-to-jpg") {
+  if (tool.slug === "pdf-to-jpg" || tool.slug === "pdf-to-png") {
     return (
       <div>
         <fieldset className="field">
@@ -211,6 +222,9 @@ function OptionsPanel({ tool, options, setOptions }) {
             <option value="recommended">Recommended</option>
             <option value="small">Smaller file</option>
           </select>
+          <span className="help">
+            High keeps more detail. Recommended is the default. Smaller file makes a lighter image.
+          </span>
         </label>
       </div>
     );
@@ -235,6 +249,9 @@ function OptionsPanel({ tool, options, setOptions }) {
             <option value="ranges">Split by page ranges</option>
             <option value="every">Split every page into its own PDF</option>
           </select>
+          <span className="help">
+            Extract keeps the chosen pages in one PDF. Ranges makes one PDF per range. Every page makes one PDF per sheet.
+          </span>
         </label>
         {options.mode !== "every" && (
           <label className="field">
@@ -264,6 +281,9 @@ function OptionsPanel({ tool, options, setOptions }) {
           <span className="help">
             Strong compression rebuilds pages as images. Text may no longer be selectable.
           </span>
+        )}
+        {options.level !== "strong" && (
+          <span className="help">Recommended is the usual starting point. Low keeps more quality. The new size is shown after you run it.</span>
         )}
       </label>
     );

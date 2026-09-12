@@ -20,6 +20,8 @@ export default function AdminDashboardPage() {
     ["Drafts", stats.drafts],
     ["Scheduled Guides", stats.scheduled],
     ["Unpublished", stats.unpublished],
+    ["Live tools", stats.tools],
+    ["Devices", stats.devices],
     ["Categories", stats.categories],
   ];
 

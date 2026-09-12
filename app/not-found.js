@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTools } from "@/lib/tools";
+import ToolCard from "./components/ToolCard";
 
 export default function NotFound() {
   const tools = getTools().slice(0, 6);
@@ -8,12 +9,12 @@ export default function NotFound() {
     <div className="wrap" style={{ padding: "48px 0 64px" }}>
       <h1>Page not found</h1>
       <p className="lede">
-        That address is not a tool or guide on this site. Search guides, open a PDF tool, or go back to the homepage.
+        That address is not a tool or guide on this site. Search, open a PDF tool, or go back to the homepage.
       </p>
-      <form action="/guides/search" method="get" className="guide-search">
-        <label htmlFor="q">Search guides</label>
+      <form action="/search" method="get" className="guide-search">
+        <label htmlFor="q">Search tools and guides</label>
         <div className="hero-actions">
-          <input id="q" name="q" placeholder="Search guides" />
+          <input id="q" name="q" placeholder="PDF to Word, merge, iPhone…" />
           <button className="btn btn-primary" type="submit">
             Search
           </button>
@@ -34,10 +35,7 @@ export default function NotFound() {
         <h2>PDF tools</h2>
         <div className="grid-tools">
           {tools.map((tool) => (
-            <Link className="tool-card" key={tool.slug} href={`/${tool.slug}`}>
-              <h3>{tool.name}</h3>
-              <p>{tool.intro}</p>
-            </Link>
+            <ToolCard key={tool.slug} tool={tool} showCta={false} />
           ))}
         </div>
       </section>

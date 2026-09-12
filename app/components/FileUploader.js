@@ -6,17 +6,40 @@ import { formatBytes, MAX_FILE_BYTES } from "@/lib/site";
 export default function FileUploader({
   files,
   onFiles,
+  onError,
   multiple = false,
   accept = "application/pdf,.pdf",
   label = "Choose PDF",
-  hint = "PDF files up to 25 MB. Processed in your browser — nothing is uploaded to our servers.",
+  dropTitle,
+  hint,
 }) {
   const inputRef = useRef(null);
   const [drag, setDrag] = useState(false);
+  const help =
+    hint || "Files up to 25 MB. Processed in your browser — nothing is uploaded to our servers.";
 
   function addFiles(list) {
     const incoming = Array.from(list || []);
     if (!incoming.length) return;
+    const empty = incoming.find((file) => file.size <= 0);
+    if (empty) {
+      onError?.({
+        code: "INVALID_FILE",
+        title: "The selected file is empty.",
+        hint: "Choose a different file.",
+      });
+      return;
+    }
+    const tooLarge = incoming.find((file) => file.size > MAX_FILE_BYTES);
+    if (tooLarge) {
+      onError?.({
+        code: "TOO_LARGE",
+        title: `${tooLarge.name} is over the ${formatBytes(MAX_FILE_BYTES)} limit.`,
+        hint: "Choose a smaller file, or compress it first.",
+      });
+      return;
+    }
+    onError?.(null);
     if (multiple) {
       onFiles([...(files || []), ...incoming]);
     } else {
@@ -40,10 +63,10 @@ export default function FileUploader({
         }}
       >
         <p style={{ fontWeight: 800, margin: "0 0 6px" }}>
-          {multiple ? "Add PDF files" : "Drop a PDF here or tap to choose"}
+          {dropTitle || (multiple ? "Add files" : "Drop a file here or tap to choose")}
         </p>
         <p className="help" style={{ margin: "0 0 16px" }}>
-          {hint}
+          {help}
         </p>
         <button type="button" className="btn btn-primary" onClick={() => inputRef.current?.click()}>
           {label}

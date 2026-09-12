@@ -5,11 +5,15 @@ import { getTool } from "@/lib/tools";
 import { formatDate } from "@/lib/slug";
 import JsonLd, { breadcrumbJsonLd } from "../JsonLd";
 import { absoluteUrl } from "@/lib/site";
+import GuideToc from "./GuideToc";
+import GuideToolbar from "./GuideToolbar";
+import { getGuideViews } from "@/lib/guide-views";
 
-export default function GuideArticle({ guide, preview = false }) {
+export default async function GuideArticle({ guide, preview = false }) {
   const toc = extractToc(guide.contentJson);
   const faqs = faqsFromDoc(guide.contentJson);
   const tools = (guide.relatedTools || []).map(getTool).filter(Boolean);
+  const views = preview ? 0 : await getGuideViews(guide.slug);
   const crumbs = [
     { name: "Home", path: "/" },
     { name: "Guides", path: "/guides" },
@@ -58,7 +62,18 @@ export default function GuideArticle({ guide, preview = false }) {
         )}
       </p>
       <h1>{guide.title}</h1>
-      <p className="lede">{guide.excerpt}</p>
+      <div className="guide-title-row">
+        <p className="lede">{guide.excerpt}</p>
+        {!preview && (
+          <GuideToolbar
+            slug={guide.slug}
+            title={guide.title}
+            url={absoluteUrl(`/guides/${guide.slug}`)}
+            readMinutes={guide.readingTime || 1}
+            initialViews={views}
+          />
+        )}
+      </div>
       <p className="help">
         {guide.author && (
           <>
@@ -76,19 +91,10 @@ export default function GuideArticle({ guide, preview = false }) {
           {guide.featuredImage.caption && <figcaption>{guide.featuredImage.caption}</figcaption>}
         </figure>
       )}
-      {toc.length >= 3 && (
-        <nav className="toc" aria-label="On this page">
-          <h2>On this page</h2>
-          <ol>
-            {toc.map((item) => (
-              <li key={item.id} style={{ marginLeft: item.level === 3 ? 16 : 0 }}>
-                <a href={`#${item.id}`}>{item.text}</a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-      )}
-      <GuideBody doc={guide.contentJson} />
+      <div className={toc.length >= 3 ? "guide-layout" : undefined}>
+        {toc.length >= 3 ? <GuideToc title="On this page" items={toc} /> : null}
+        <GuideBody doc={guide.contentJson} />
+      </div>
       {tools.length > 0 && (
         <section className="section">
           <h2>Try the tool</h2>

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { slugify } from "@/lib/slug";
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({ name: "", slug: "", description: "", sortOrder: 0 });
   const [error, setError] = useState("");
+  const [slugLocked, setSlugLocked] = useState(false);
 
   function load() {
     fetch("/api/admin/categories")
@@ -31,6 +33,7 @@ export default function AdminCategoriesPage() {
       return;
     }
     setForm({ name: "", slug: "", description: "", sortOrder: 0 });
+    setSlugLocked(false);
     load();
   }
 
@@ -62,11 +65,25 @@ export default function AdminCategoriesPage() {
       <form className="workspace" onSubmit={create}>
         <label className="field">
           Name
-          <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
+          <input
+            value={form.name}
+            onChange={(event) => {
+              const name = event.target.value;
+              setForm((current) => ({ ...current, name, slug: slugLocked ? current.slug : slugify(name) }));
+            }}
+            required
+          />
         </label>
         <label className="field">
           Slug
-          <input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value })} placeholder="pdf-conversion" />
+          <input
+            value={form.slug}
+            onChange={(event) => {
+              setSlugLocked(true);
+              setForm({ ...form, slug: slugify(event.target.value) });
+            }}
+            placeholder="pdf-conversion"
+          />
         </label>
         <label className="field">
           Description

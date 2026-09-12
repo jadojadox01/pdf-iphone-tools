@@ -7,10 +7,15 @@ import { useEffect } from "react";
 const items = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/guides", label: "Guides" },
+  { href: "/admin/tools", label: "Tools" },
+  { href: "/admin/devices", label: "Devices" },
   { href: "/admin/categories", label: "Categories" },
-  { href: "/admin/authors", label: "Authors" },
+  { href: "/admin/tags", label: "Tags" },
   { href: "/admin/media", label: "Media" },
+  { href: "/admin/authors", label: "Authors" },
+  { href: "/admin/blocks", label: "Reusable Blocks" },
   { href: "/admin/seo", label: "SEO" },
+  { href: "/admin/redirects", label: "Redirects" },
   { href: "/admin/settings", label: "Settings" },
 ];
 
@@ -38,7 +43,7 @@ export default function AdminShell({ children }) {
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <Link href="/admin" className="admin-brand">
-          Guides CMS
+          Content system
         </Link>
         <nav>
           {items.map((item) => (

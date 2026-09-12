@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title">
+  <title id="title">PDF guide</title>
+  <rect width="1200" height="675" fill="#f6f1e8"/>
+  <circle cx="980" cy="120" r="160" fill="#ccfbf1"/>
+  <rect x="430" y="160" width="340" height="360" rx="24" fill="#fffdf8" stroke="#e7d8c4" stroke-width="4"/>
+  <rect x="470" y="210" width="260" height="16" rx="8" fill="#0f766e"/>
+  <rect x="470" y="250" width="220" height="12" rx="6" fill="#e7d8c4"/>
+  <rect x="470" y="280" width="240" height="12" rx="6" fill="#e7d8c4"/>
+  <rect x="470" y="310" width="180" height="12" rx="6" fill="#e7d8c4"/>
+  <text x="600" y="400" text-anchor="middle" font-family="Outfit, Segoe UI, sans-serif" font-size="28" font-weight="700" fill="#1c1917">Guide</text>
+</svg>

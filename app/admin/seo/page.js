@@ -16,7 +16,7 @@ export default function AdminSeoPage() {
     <div className="admin-page">
       <h1>SEO</h1>
       <p className="help">
-        Editorial checks only. These fields do not guarantee search rankings. Sitemap and RSS include published guides automatically.
+        Editorial checks only. These fields do not guarantee search rankings. Do not publish extra guides to fill this table. Sitemap and RSS include published guides automatically.
       </p>
       <ul>
         <li>

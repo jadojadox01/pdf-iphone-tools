@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { slugify } from "@/lib/slug";
 
 export default function AdminAuthorsPage() {
   const [authors, setAuthors] = useState([]);
   const [form, setForm] = useState({ name: "", slug: "", role: "", bio: "", website: "" });
   const [error, setError] = useState("");
+  const [slugLocked, setSlugLocked] = useState(false);
 
   function load() {
     fetch("/api/admin/authors")
@@ -31,6 +33,7 @@ export default function AdminAuthorsPage() {
       return;
     }
     setForm({ name: "", slug: "", role: "", bio: "", website: "" });
+    setSlugLocked(false);
     load();
   }
 
@@ -57,16 +60,31 @@ export default function AdminAuthorsPage() {
   return (
     <div className="admin-page">
       <h1>Authors</h1>
-      <p className="help">Use real people or the product team. Do not invent names to look like a larger staff.</p>
+      <p className="help">
+        Use a real name or “PDFFlow”. Only write credentials, years, companies, or awards that are true. Leave the bio short if you have nothing extra to say.
+      </p>
       {error && <div className="alert alert-error">{error}</div>}
       <form className="workspace" onSubmit={create}>
         <label className="field">
           Name
-          <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
+          <input
+            value={form.name}
+            onChange={(event) => {
+              const name = event.target.value;
+              setForm((current) => ({ ...current, name, slug: slugLocked ? current.slug : slugify(name) }));
+            }}
+            required
+          />
         </label>
         <label className="field">
           Slug
-          <input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value })} />
+          <input
+            value={form.slug}
+            onChange={(event) => {
+              setSlugLocked(true);
+              setForm({ ...form, slug: slugify(event.target.value) });
+            }}
+          />
         </label>
         <label className="field">
           Role

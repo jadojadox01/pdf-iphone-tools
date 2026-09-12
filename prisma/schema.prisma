@@ -7,6 +7,66 @@ datasource db {
   url      = "file:../data/cms.db"
 }
 
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Device {
+  id             String       @id @default(cuid())
+  name           String
+  slug           String       @unique
+  description    String       @default("")
+  intro          String       @default("")
+  icon           String       @default("")
+  status         String       @default("draft")
+  sortOrder      Int          @default(0)
+  seoTitle       String       @default("")
+  seoDescription String       @default("")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  tools          ToolDevice[]
+  guides         Guide[]
+}
+
+model Tool {
+  id             String       @id @default(cuid())
+  name           String
+  slug           String       @unique
+  processorKey   String       @default("")
+  description    String       @default("")
+  intro          String       @default("")
+  category       String       @default("convert")
+  inputFormat    String       @default("pdf")
+  outputFormat   String       @default("")
+  status         String       @default("live")
+  cta            String       @default("")
+  seoTitle       String       @default("")
+  seoDescription String       @default("")
+  sortOrder      Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  devices        ToolDevice[]
+  guides         GuideTool[]
+}
+
+model ToolDevice {
+  toolId    String
+  deviceId  String
+  featured  Boolean @default(false)
+  headline  String  @default("")
+  intro     String  @default("")
+  sortOrder Int     @default(0)
+  tool      Tool    @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  device    Device  @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@id([toolId, deviceId])
+}
+
 model Author {
   id        String   @id @default(cuid())
   name      String
@@ -45,10 +105,11 @@ model Media {
   mimeType    String
   alt         String   @default("")
   caption     String   @default("")
+  url         String   @default("")
   width       Int?
   height      Int?
   size        Int      @default(0)
-  data        Bytes
+  data        Bytes?
   createdAt   DateTime @default(now())
   featuredFor Guide[]  @relation("FeaturedImage")
   ogFor       Guide[]  @relation("OgImage")
@@ -60,7 +121,8 @@ model Guide {
   title           String
   slug            String    @unique
   excerpt         String    @default("")
-  contentJson     String    @default("{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\"}]}")
+  template        String    @default("HOW_TO")
+  blocksJson      String    @default("[]")
   searchText      String    @default("")
   status          String    @default("draft")
   featured        Boolean   @default(false)
@@ -79,16 +141,22 @@ model Guide {
   ogImageId       String?
   authorId        String?
   categoryId      String?
+  deviceId        String?
 
-  author         Author?          @relation(fields: [authorId], references: [id])
-  category       Category?        @relation(fields: [categoryId], references: [id])
-  featuredImage  Media?           @relation("FeaturedImage", fields: [featuredImageId], references: [id])
-  ogImage        Media?           @relation("OgImage", fields: [ogImageId], references: [id])
-  tags           GuideTag[]
-  relatedTools   GuideTool[]
-  relatedFrom    GuideRelation[]  @relation("FromGuide")
-  relatedTo      GuideRelation[]  @relation("ToGuide")
-  revisions      GuideRevision[]
+  author        Author?         @relation(fields: [authorId], references: [id])
+  category      Category?       @relation(fields: [categoryId], references: [id])
+  device        Device?         @relation(fields: [deviceId], references: [id])
+  featuredImage Media?          @relation("FeaturedImage", fields: [featuredImageId], references: [id])
+  ogImage       Media?          @relation("OgImage", fields: [ogImageId], references: [id])
+  tags          GuideTag[]
+  relatedTools  GuideTool[]
+  relatedFrom   GuideRelation[] @relation("FromGuide")
+  relatedTo     GuideRelation[] @relation("ToGuide")
+  revisions     GuideRevision[]
+
+  @@index([status, publishedAt])
+  @@index([slug])
+  @@index([deviceId])
 }
 
 model GuideTag {
@@ -101,11 +169,12 @@ model GuideTag {
 }
 
 model GuideTool {
-  guideId  String
-  toolSlug String
-  guide    Guide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  guideId String
+  toolId  String
+  guide   Guide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  tool    Tool  @relation(fields: [toolId], references: [id], onDelete: Cascade)
 
-  @@id([guideId, toolSlug])
+  @@id([guideId, toolId])
 }
 
 model GuideRelation {
@@ -118,13 +187,21 @@ model GuideRelation {
 }
 
 model GuideRevision {
-  id          String   @id @default(cuid())
-  guideId     String
-  title       String
-  excerpt     String   @default("")
-  contentJson String
-  createdAt   DateTime @default(now())
-  guide       Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  guideId    String
+  title      String
+  excerpt    String   @default("")
+  blocksJson String
+  createdAt  DateTime @default(now())
+  guide      Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+}
+
+model Redirect {
+  id        String   @id @default(cuid())
+  fromPath  String   @unique
+  toPath    String
+  statusCode Int     @default(301)
+  createdAt DateTime @default(now())
 }
 
 model Setting {

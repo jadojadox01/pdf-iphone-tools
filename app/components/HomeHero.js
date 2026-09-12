@@ -21,15 +21,13 @@ export default function HomeHero() {
       <div className="wrap">
         <div className="hero-card">
           <div className="kicker">
-            <span>Free</span>
+            <span>No install</span>
             <span>•</span>
-            <span>No installation</span>
-            <span>•</span>
-            <span>Works on iPhone</span>
+            <span>Files stay in your browser</span>
           </div>
-          <h1>Free PDF Tools for iPhone</h1>
+          <h1>Simple PDF tools for every device</h1>
           <p className="lede">
-            Convert, merge, compress, split, sign, and manage PDFs directly from your browser — no app required.
+            Convert, merge, split, and compress PDFs in your browser. Open a tool, choose a file, download the result.
           </p>
           <div className="hero-actions">
             <button type="button" className="btn btn-primary" onClick={() => inputRef.current?.click()}>
@@ -67,9 +65,7 @@ export default function HomeHero() {
               ))}
             </div>
           )}
-          <p className="help">
-            Files are processed in your browser and are not uploaded to our servers. Also works on iPad, Android, Windows, macOS, and Linux.
-          </p>
+          <p className="help">Files are processed in your browser. They are not uploaded to our servers.</p>
         </div>
       </div>
     </section>

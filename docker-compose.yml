@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pdfflow
+      POSTGRES_PASSWORD: pdfflow
+      POSTGRES_DB: pdfflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - pdfflow_pg:/var/lib/postgresql/data
+
+volumes:
+  pdfflow_pg:

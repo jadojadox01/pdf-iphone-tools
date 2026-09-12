@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title">
+  <title id="title">Save a PDF to the Files app on iPhone</title>
+  <rect width="960" height="540" fill="#efe4d4"/>
+  <rect x="80" y="70" width="800" height="400" rx="28" fill="#fffdf8" stroke="#e7d8c4" stroke-width="3"/>
+  <rect x="120" y="110" width="200" height="260" rx="16" fill="#ffedd5"/>
+  <text x="220" y="250" text-anchor="middle" font-family="Outfit, sans-serif" font-size="22" font-weight="700" fill="#c2410c">Mail / WhatsApp</text>
+  <path d="M350 240h80" stroke="#0f766e" stroke-width="8" stroke-linecap="round"/>
+  <path d="M410 224l28 16-28 16" fill="none" stroke="#0f766e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="460" y="110" width="360" height="260" rx="16" fill="#ccfbf1"/>
+  <text x="640" y="230" text-anchor="middle" font-family="Outfit, sans-serif" font-size="22" font-weight="700" fill="#115e59">Files / iCloud Drive</text>
+  <text x="640" y="268" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="16" fill="#57534e">Safari can pick the PDF from here</text>
+  <text x="480" y="430" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="18" fill="#57534e">Share ’ Save to Files before you convert</text>
+</svg>

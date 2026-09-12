@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { adminGuard } from "@/lib/admin-guard";
 import { buildGuideRecord, saveRevision, syncGuideRelations } from "@/lib/cms/guides";
+import { getGuidePlanning, publishBlockReason } from "@/lib/cms/planning";
 
 function includeGuide() {
   return {
@@ -61,6 +62,10 @@ export async function POST(request) {
     return NextResponse.json({ error: "Title is required." }, { status: 400 });
   }
   const data = buildGuideRecord(body);
+  if (data.status === "published") {
+    const blocked = publishBlockReason(body, getGuidePlanning(body));
+    if (blocked) return NextResponse.json({ error: blocked }, { status: 400 });
+  }
   try {
     const guide = await prisma.guide.create({ data, include: includeGuide() });
     await syncGuideRelations(guide.id, {

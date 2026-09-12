@@ -33,10 +33,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# OCR engine assets (copied on postinstall)
+/public/tesseract/*.wasm
+/public/tesseract/*.wasm.js
+/public/tesseract/*.gz
+

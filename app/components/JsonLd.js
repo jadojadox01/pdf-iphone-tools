@@ -15,6 +15,8 @@ export function webAppJsonLd() {
     "@type": "WebApplication",
     name: SITE_NAME,
     url: SITE_URL,
+    logo: absoluteUrl("/brand/logo.png"),
+    image: absoluteUrl("/brand/logo-mark.png"),
     applicationCategory: "UtilitiesApplication",
     operatingSystem: "iOS, Android, Windows, macOS, Linux",
     offers: {
@@ -23,7 +25,56 @@ export function webAppJsonLd() {
       priceCurrency: "USD",
     },
     description:
-      "Free PDF tools that run in the browser. Convert, merge, compress, split, sign, and protect PDFs on iPhone without installing an app.",
+      "PDFFlow is a website of PDF tools that run in your browser. Convert, merge, split, compress, sign, and protect files without installing an app.",
+    featureList: [
+      "PDF to Word",
+      "PDF to JPG",
+      "Merge PDF",
+      "Split PDF",
+      "Compress PDF",
+    ],
+  };
+}
+
+export function websiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    description:
+      "PDFFlow is a website of PDF tools that run in your browser. Convert, merge, split, compress, sign, and protect PDFs without installing an app.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_URL}/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+export function toolListJsonLd(tools) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "PDF tools",
+    itemListElement: tools.map((tool, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: tool.name,
+      description: tool.definition || tool.description,
+      url: absoluteUrl(`/tools/${tool.slug}`),
+    })),
+  };
+}
+
+export function definedTermJsonLd(tool, path) {
+  if (!tool?.definition) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    name: tool.name,
+    description: tool.definition,
+    url: absoluteUrl(path),
   };
 }
 

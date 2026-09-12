@@ -28,14 +28,19 @@ export default function AdminGuidesPage() {
 
   async function act(id, action) {
     if (action === "delete" && !window.confirm("Soft-delete this guide? It will leave public listings.")) return;
-    await fetch(`/api/admin/guides/${id}`, {
+    const response = await fetch(`/api/admin/guides/${id}`, {
       method: action === "delete" ? "DELETE" : "PATCH",
       headers: { "Content-Type": "application/json" },
       body: action === "delete" ? undefined : JSON.stringify({
         action: action === "duplicate" ? "duplicate" : undefined,
-        status: action === "publish" ? "published" : action === "unpublish" ? "unpublished" : undefined,
+        status: action === "publish" ? "published" : action === "unpublish" ? "unpublished" : action === "archive" ? "archived" : undefined,
       }),
     });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      window.alert(data.error || "That action failed.");
+      return;
+    }
     load();
   }
 
@@ -69,6 +74,7 @@ export default function AdminGuidesPage() {
           <option value="published">Published</option>
           <option value="scheduled">Scheduled</option>
           <option value="unpublished">Unpublished</option>
+          <option value="archived">Archived</option>
         </select>
         <select value={filters.categoryId} onChange={(event) => setFilters({ ...filters, categoryId: event.target.value })}>
           <option value="">All categories</option>
@@ -140,6 +146,7 @@ export default function AdminGuidesPage() {
                   <Link href={`/admin/guides/${guide.id}/preview`}>Preview</Link>
                   <button type="button" onClick={() => act(guide.id, "publish")}>Publish</button>
                   <button type="button" onClick={() => act(guide.id, "unpublish")}>Unpublish</button>
+                  <button type="button" onClick={() => act(guide.id, "archive")}>Archive</button>
                   <button type="button" onClick={() => act(guide.id, "duplicate")}>Duplicate</button>
                   <button type="button" onClick={() => act(guide.id, "delete")}>Delete</button>
                 </td>

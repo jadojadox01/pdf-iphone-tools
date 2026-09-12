@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPublicAuthor } from "@/lib/cms/guides";
+import { getPublicAuthor, guidePath } from "@/lib/cms/guides";
 import { pageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +13,7 @@ export async function generateMetadata({ params }) {
     title: `${author.name} — Guides`,
     description: author.bio || `Guides by ${author.name}.`,
     path: `/authors/${author.slug}`,
+    noIndex: !author.guides.length,
   });
 }
 
@@ -36,7 +37,7 @@ export default async function AuthorPage({ params }) {
       <h2>Guides</h2>
       <div className="grid-tools">
         {author.guides.map((guide) => (
-          <Link className="tool-card" key={guide.id} href={`/guides/${guide.slug}`}>
+          <Link className="tool-card" key={guide.id} href={guidePath(guide)}>
             <h3>{guide.title}</h3>
             <p>{guide.excerpt}</p>
           </Link>

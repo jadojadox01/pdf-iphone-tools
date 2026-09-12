@@ -77,7 +77,31 @@ async function main() {
   zip.file("mimetype", "application/epub+zip", { compression: "STORE" });
   zip.file("EPUB/content.opf", "<package></package>");
   const epub = await zip.generateAsync({ type: "nodebuffer" });
+  if (epub.length < 50) throw new Error("EPUB looks too small");
   await writeFile(path.join(outDir, "sample.epub"), epub);
+
+  const { default: PptxGenJS } = await import("pptxgenjs");
+  const ppt = new PptxGenJS();
+  const slide = ppt.addSlide();
+  slide.addText("PDF page 1", { x: 0.5, y: 0.5, fontSize: 18 });
+  const pptx = await ppt.write("nodebuffer");
+  if (!pptx || pptx.length < 1000) throw new Error("PPTX looks too small");
+  await writeFile(path.join(outDir, "sample.pptx"), pptx);
+
+  const png = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    "base64",
+  );
+  const signed = await PDFDocument.load(original);
+  const image = await signed.embedPng(png);
+  signed.getPage(0).drawImage(image, { x: 40, y: 40, width: 80, height: 24 });
+  await writeFile(path.join(outDir, "signed.pdf"), await signed.save());
+
+  const compressed = await PDFDocument.create();
+  const source = await PDFDocument.load(original);
+  const copiedPages = await compressed.copyPages(source, source.getPageIndices());
+  copiedPages.forEach((page) => compressed.addPage(page));
+  await writeFile(path.join(outDir, "compressed.pdf"), await compressed.save({ useObjectStreams: true }));
 
   console.log("PDF tool self-test passed");
 }

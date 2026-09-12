@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CONTACT_EMAIL } from "@/lib/site";
+import { CONTACT_EMAIL, CONTACT_WHATSAPP, CONTACT_WHATSAPP_URL } from "@/lib/site";
 
 export default function ContactForm() {
   const [name, setName] = useState("");
@@ -19,8 +19,16 @@ export default function ContactForm() {
     <div className="wrap" style={{ padding: "32px 0 64px" }}>
       <h1>Contact</h1>
       <p className="lede">
-        Questions about a tool, privacy, or a guide? The form opens your email app with a prefilled draft. Nothing is stored on this website.
+        Email or WhatsApp if a tool failed, a guide is wrong, or you have a privacy question.
       </p>
+      <div className="workspace" style={{ marginBottom: 24 }}>
+        <p>
+          Email: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+        </p>
+        <p>
+          WhatsApp: <a href={CONTACT_WHATSAPP_URL}>{CONTACT_WHATSAPP}</a>
+        </p>
+      </div>
       <form className="workspace" onSubmit={onSubmit}>
         <label className="field">
           Your name
@@ -35,6 +43,7 @@ export default function ContactForm() {
           <select value={subject} onChange={(event) => setSubject(event.target.value)}>
             <option>Support</option>
             <option>Privacy</option>
+            <option>Guide correction</option>
             <option>Tool suggestion</option>
             <option>Other</option>
           </select>
@@ -46,7 +55,7 @@ export default function ContactForm() {
         <button className="btn btn-primary" type="submit">
           Open email draft
         </button>
-        <p className="help">You can also email {CONTACT_EMAIL} directly.</p>
+        <p className="help">The button opens your email app with a prefilled draft. Nothing is stored on this website.</p>
       </form>
     </div>
   );

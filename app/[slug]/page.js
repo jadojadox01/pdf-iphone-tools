@@ -1,26 +1,13 @@
-import { notFound } from "next/navigation";
-import ToolPageView from "../components/ToolPageView";
-import { getTool, getTools } from "@/lib/tools";
-import { toolMetadata } from "@/lib/seo";
-import { getGuidesForTool } from "@/lib/cms/guides";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
+import { getTool } from "@/lib/tools";
+import { prisma } from "@/lib/db";
+import { toolPath } from "@/lib/paths";
 
-export const dynamic = "force-dynamic";
-
-export async function generateStaticParams() {
-  return getTools().map((tool) => ({ slug: tool.slug }));
-}
-
-export async function generateMetadata({ params }) {
+export default async function LegacyToolPage({ params }) {
   const { slug } = await params;
-  const tool = getTool(slug);
-  if (!tool) return {};
-  return toolMetadata(tool);
-}
-
-export default async function ToolRoutePage({ params }) {
-  const { slug } = await params;
+  const stored = await prisma.redirect.findUnique({ where: { fromPath: `/${slug}` } }).catch(() => null);
+  if (stored?.toPath) permanentRedirect(stored.toPath);
   const tool = getTool(slug);
   if (!tool) notFound();
-  const relatedGuides = await getGuidesForTool(tool.slug);
-  return <ToolPageView tool={tool} relatedGuides={relatedGuides} />;
+  redirect(toolPath(tool.slug));
 }

@@ -4,7 +4,12 @@ import { prisma } from "@/lib/db";
 export async function GET(request, { params }) {
   const { id } = await params;
   const media = await prisma.media.findUnique({ where: { id } });
-  if (!media) return new NextResponse("Not found", { status: 404 });
+  if (!media?.data) {
+    if (media?.url && /^https?:\/\//i.test(media.url)) {
+      return NextResponse.redirect(media.url);
+    }
+    return new NextResponse("Not found", { status: 404 });
+  }
   return new NextResponse(Buffer.from(media.data), {
     headers: {
       "Content-Type": media.mimeType,

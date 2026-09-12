@@ -1,315 +1,193 @@
 const { PrismaClient } = require("@prisma/client");
+const { howToBlocks, IPHONE_TOOL_INTROS, RELATED_TOOL_SLUGS } = require("./content/iphone-pdf-to-word-guide");
 
 const prisma = new PrismaClient();
-
-function text(value, marks = []) {
-  return { type: "text", text: value, ...(marks.length ? { marks } : {}) };
-}
-
-function p(...parts) {
-  return { type: "paragraph", content: parts.flat() };
-}
-
-function h(level, value) {
-  return {
-    type: "heading",
-    attrs: { level },
-    content: [text(value)],
-  };
-}
-
-function list(items, ordered = false) {
-  return {
-    type: ordered ? "orderedList" : "bulletList",
-    content: items.map((item) => ({
-      type: "listItem",
-      content: [typeof item === "string" ? p(text(item)) : item],
-    })),
-  };
-}
-
-function link(label, href) {
-  return text(label, [{ type: "link", attrs: { href } }]);
-}
-
-function bold(value) {
-  return text(value, [{ type: "bold" }]);
-}
-
-function doc(content) {
-  return { type: "doc", content };
-}
-
-function callout(variant, ...parts) {
-  return { type: "callout", attrs: { variant }, content: [p(...parts)] };
-}
-
-function faq(question, ...parts) {
-  return { type: "faqItem", attrs: { question }, content: [p(...parts)] };
-}
-
-function toolCta(toolSlug) {
-  return { type: "toolCta", attrs: { toolSlug } };
-}
-
-const guides = [
-  {
-    title: "How to Convert PDF to Word on iPhone",
-    slug: "how-to-convert-pdf-to-word-on-iphone",
-    excerpt:
-      "Turn a text PDF into an editable Word file in Safari, without installing another app.",
-    category: "pdf-conversion",
-    tags: ["iPhone", "PDF to Word", "Safari"],
-    tools: ["pdf-to-word", "compress-pdf", "split-pdf"],
-    featured: true,
-    seoTitle: "How to Convert PDF to Word on iPhone",
-    seoDescription:
-      "Convert a PDF to Word on iPhone in Safari. Works with text-based PDFs. Scanned pages need OCR, which this tool does not run.",
-    content: doc([
-      h(2, "The problem"),
-      p(text("You have a PDF on your iPhone and need a Word file you can edit. Installing another app is optional; a browser tool can do this if the PDF already contains text.")),
-      h(2, "What you need"),
-      list([
-        "The PDF in Files, iCloud Drive, or another app that can share into Safari",
-        "Safari or another mobile browser",
-        "A text-based PDF. Photographed pages will not become editable text here",
-      ]),
-      h(2, "Step-by-step"),
-      list(
-        [
-          p(text("Open the "), link("PDF to Word", "/pdf-to-word"), text(" tool in Safari.")),
-          p(text("Tap "), bold("Choose PDF"), text(" and select the file.")),
-          p(text("Tap "), bold("Convert PDF to Word"), text(" and wait until the file is ready.")),
-          p(text("Tap "), bold("Download"), text(" and open the .docx file in Word or Pages.")),
-        ],
-        true,
-      ),
-      h(2, "Text PDFs vs scanned PDFs"),
-      p(text("If the PDF was exported from Word, Pages, or a website, there is usually text to extract.")),
-      p(text("If the PDF is a photo of a page, there is little or no text. This site does not run OCR, and it will say so instead of inventing a Word document.")),
-      toolCta("pdf-to-word"),
-      h(2, "If conversion fails"),
-      list([
-        "Confirm the file is a real PDF, not a renamed image",
-        "Compress a very large file first",
-        "Split a long document and convert one part at a time",
-      ]),
-      faq("Does this work in Safari on iPhone?", text("Yes. Choose the PDF from Files or iCloud Drive, convert it, then download the Word file.")),
-      faq("Will a scanned PDF become editable?", text("No. Scanned pages need OCR, which this converter does not perform.")),
-    ]),
-  },
-  {
-    title: "How to Merge PDF Files on iPhone",
-    slug: "how-to-merge-pdf-files-on-iphone",
-    excerpt: "Combine several PDFs into one file from the Files app and a browser, then download the merged document.",
-    category: "pdf-management",
-    tags: ["iPhone", "Merge PDF"],
-    tools: ["merge-pdf", "split-pdf", "compress-pdf"],
-    featured: true,
-    seoTitle: "How to Merge PDF Files on iPhone",
-    seoDescription: "Merge PDFs on iPhone in Safari. Reorder files, remove extras, and download one combined PDF.",
-    content: doc([
-      h(2, "When merging helps"),
-      p(text("Merging is useful when scans, forms, or downloads belong together as one file.")),
-      h(2, "Step-by-step"),
-      list(
-        [
-          p(text("Open "), link("Merge PDF", "/merge-pdf"), text(".")),
-          p(text("Add two or more PDF files.")),
-          p(text("Use Up and Down to set the order. Those buttons are easier than drag-and-drop on a phone.")),
-          p(text("Remove any file you added by mistake, then tap Merge PDFs and download.")),
-        ],
-        true,
-      ),
-      callout("info", text("The merged file is created on your device. The originals stay in Files until you delete them.")),
-      toolCta("merge-pdf"),
-    ]),
-  },
-  {
-    title: "How to Compress a PDF on iPhone",
-    slug: "how-to-compress-a-pdf-on-iphone",
-    excerpt: "Reduce PDF size for email or uploads, and check whether the new file is actually smaller.",
-    category: "pdf-management",
-    tags: ["iPhone", "Compress PDF"],
-    tools: ["compress-pdf", "split-pdf", "pdf-to-jpg"],
-    featured: false,
-    seoTitle: "How to Compress a PDF on iPhone",
-    seoDescription: "Compress a PDF on iPhone and compare the real original and new file sizes.",
-    content: doc([
-      h(2, "Why size matters"),
-      p(text("A smaller PDF is easier to email and upload. Compression does not shrink every file, especially if it is already optimized.")),
-      h(2, "Step-by-step"),
-      list(
-        [
-          p(text("Open "), link("Compress PDF", "/compress-pdf"), text(".")),
-          p(text("Choose Low, Recommended, or Strong.")),
-          p(text("Compress, then read the size comparison before you keep the result.")),
-        ],
-        true,
-      ),
-      p(bold("Strong"), text(" compression rebuilds pages as images. Text may stop being selectable. Use Recommended first if you still need to copy text.")),
-      toolCta("compress-pdf"),
-    ]),
-  },
-  {
-    title: "How to Sign a PDF on iPhone",
-    slug: "how-to-sign-a-pdf-on-iphone",
-    excerpt: "Draw, type, or upload a signature, place it on the page, and download a PDF that actually contains it.",
-    category: "pdf-signing",
-    tags: ["iPhone", "Sign PDF"],
-    tools: ["sign-pdf", "protect-pdf"],
-    featured: true,
-    seoTitle: "How to Sign a PDF on iPhone",
-    seoDescription: "Sign a PDF on iPhone in Safari. The signature is embedded in the downloaded file, not only shown on screen.",
-    content: doc([
-      h(2, "What this does"),
-      p(text("You can sign a form in the browser. The downloaded PDF should contain the signature, not only an overlay on the screen.")),
-      h(2, "Step-by-step"),
-      list(
-        [
-          p(text("Open "), link("Sign PDF", "/sign-pdf"), text(" and choose the file.")),
-          p(text("Draw with your finger, type a name, or upload a signature image.")),
-          p(text("Pick the page, move the signature, then save and download.")),
-        ],
-        true,
-      ),
-      callout("warn", text("This is a visual signature on the page. It is not a certificate-based digital signature.")),
-      toolCta("sign-pdf"),
-    ]),
-  },
-  {
-    title: "How to Convert PDF to JPG on iPhone",
-    slug: "how-to-convert-pdf-to-jpg-on-iphone",
-    excerpt: "Turn PDF pages into JPG images, including multi-page files packed into a ZIP.",
-    category: "pdf-conversion",
-    tags: ["iPhone", "PDF to JPG"],
-    tools: ["pdf-to-jpg", "rotate-pdf"],
-    featured: false,
-    seoTitle: "How to Convert PDF to JPG on iPhone",
-    seoDescription: "Convert PDF pages to JPG on iPhone. Choose all pages or a range, then download a JPG or a ZIP.",
-    content: doc([
-      h(2, "When images help"),
-      p(text("Use this when you need a photo of a page, a slide, or a poster stored as an image.")),
-      h(2, "Step-by-step"),
-      list(
-        [
-          p(text("Open "), link("PDF to JPG", "/pdf-to-jpg"), text(".")),
-          p(text("Choose all pages or enter a range such as 1-3, 5.")),
-          p(text("Download the JPG, or a ZIP if more than one page was converted.")),
-        ],
-        true,
-      ),
-      p(text("If a page is sideways, "), link("rotate the PDF", "/rotate-pdf"), text(" first, then convert.")),
-      toolCta("pdf-to-jpg"),
-    ]),
-  },
-  {
-    title: "How to Reduce PDF File Size on iPhone",
-    slug: "how-to-reduce-pdf-file-size-on-iphone",
-    excerpt: "Compress first, split if you only need some pages, and convert to images only when that is the right output.",
-    category: "iphone-pdf",
-    tags: ["iPhone", "Compress PDF", "Split PDF"],
-    tools: ["compress-pdf", "split-pdf", "pdf-to-jpg"],
-    featured: false,
-    seoTitle: "How to Reduce PDF File Size on iPhone",
-    seoDescription: "Practical ways to make a PDF smaller on iPhone: compress, split, or convert pages to images.",
-    content: doc([
-      h(2, "Start with the smallest change"),
-      p(text("If a PDF is too big to email, try compression first. Split it if you only need some pages.")),
-      h(2, "Compress the whole file"),
-      p(text("Use "), link("Compress PDF", "/compress-pdf"), text(" and compare the sizes. If the result is not smaller, keep the original.")),
-      h(2, "Split off the pages you need"),
-      p(text("If you only need a few pages, "), link("Split PDF", "/split-pdf"), text(" with a range such as 1-2.")),
-      h(2, "Convert a page to an image"),
-      p(link("PDF to JPG", "/pdf-to-jpg"), text(" can create a smaller image for sharing a single page. That is not the same as keeping a PDF.")),
-      p(text("There is no honest way to promise a specific percentage. The new size depends on the original file.")),
-    ]),
-  },
-];
 
 async function main() {
   await prisma.guideRelation.deleteMany();
   await prisma.guideTool.deleteMany();
   await prisma.guideTag.deleteMany();
   await prisma.guideRevision.deleteMany();
+  await prisma.toolDevice.deleteMany();
   await prisma.guide.deleteMany();
   await prisma.tag.deleteMany();
   await prisma.category.deleteMany();
+  await prisma.tool.deleteMany();
+  await prisma.device.deleteMany();
   await prisma.author.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.redirect.deleteMany();
+
+  await prisma.user.create({
+    data: { email: "admin@local", name: "Admin", role: "ADMIN" },
+  });
 
   const author = await prisma.author.create({
     data: {
-      name: "PDF iPhone Tools",
-      slug: "pdf-iphone-tools",
-      role: "Editorial",
-      bio: "Guides published by the team that builds these browser-based PDF tools. We write about how the tools on this site actually work.",
+      name: "PDFFlow",
+      slug: "editorial",
+      role: "Editor",
+      bio: "Publishes the guides on this site.",
     },
   });
 
-  const categories = await Promise.all(
-    [
-      ["pdf-conversion", "PDF Conversion", "Convert PDFs to Word, images, spreadsheets, and slides.", 1],
-      ["pdf-management", "PDF Management", "Merge, split, compress, and rotate PDF files.", 2],
-      ["pdf-signing", "PDF Signing", "Add a visual signature to a PDF in the browser.", 3],
-      ["pdf-security", "PDF Security", "Password-protect a PDF, or remove a password you already know.", 4],
-      ["iphone-pdf", "iPhone PDF Guides", "PDF workflows in Safari, Files, and iCloud Drive.", 5],
-      ["productivity", "Productivity", "Document workflows and file management.", 6],
-    ].map(([slug, name, description, sortOrder]) =>
-      prisma.category.create({ data: { slug, name, description, sortOrder } }),
-    ),
-  );
-  const categoryMap = Object.fromEntries(categories.map((item) => [item.slug, item]));
+  const iphone = await prisma.device.create({
+    data: {
+      name: "iPhone / iPad",
+      slug: "iphone",
+      description: "Convert and manage PDFs in Safari. No App Store install.",
+      intro:
+        "These tools run in Safari on iPhone and iPad. Choose a PDF from Files or iCloud Drive, process it on the device, and download the result.",
+      icon: "iphone",
+      status: "published",
+      sortOrder: 1,
+      seoTitle: "PDF tools for iPhone and iPad",
+      seoDescription: "Convert PDF to Word and manage PDFs in Safari on iPhone and iPad. Files stay on your device.",
+    },
+  });
 
-  const created = [];
-  for (const item of guides) {
-    const searchText = `${item.title} ${item.excerpt} ${JSON.stringify(item.content)}`.toLowerCase();
-    const guide = await prisma.guide.create({
+  await prisma.device.createMany({
+    data: [
+      {
+        name: "Android",
+        slug: "android",
+        description: "Browser PDF tools for Android.",
+        intro: "The same converters run in Chrome on Android.",
+        status: "draft",
+        sortOrder: 2,
+        seoTitle: "PDF tools for Android",
+        seoDescription: "Browser PDF tools for Android.",
+      },
+      {
+        name: "Windows",
+        slug: "windows",
+        description: "Browser PDF tools for Windows.",
+        intro: "Use these tools in Chrome, Edge, or Firefox on a Windows PC.",
+        status: "draft",
+        sortOrder: 3,
+        seoTitle: "PDF tools for Windows",
+        seoDescription: "Browser PDF tools for Windows.",
+      },
+      {
+        name: "Mac",
+        slug: "mac",
+        description: "Browser PDF tools for Mac.",
+        intro: "Use these tools in Safari or Chrome on a Mac.",
+        status: "draft",
+        sortOrder: 4,
+        seoTitle: "PDF tools for Mac",
+        seoDescription: "Browser PDF tools for Mac.",
+      },
+    ],
+  });
+
+  const catalog = [
+    { slug: "pdf-to-word", name: "PDF to Word", category: "convert", outputExt: "docx", cta: "Convert PDF to Word", title: "PDF to Word", description: "Convert a PDF into a Word file in your browser.", intro: "Upload a PDF and download a Word (.docx) file. Text PDFs use the text in the file. Scanned pages use OCR in your browser." },
+    { slug: "pdf-to-jpg", name: "PDF to JPG", category: "convert", outputExt: "jpg", cta: "Convert PDF to JPG", title: "PDF to JPG", description: "Turn PDF pages into JPG images.", intro: "Each PDF page is turned into a JPG." },
+    { slug: "pdf-to-png", name: "PDF to PNG", category: "convert", outputExt: "png", cta: "Convert PDF to PNG", title: "PDF to PNG", description: "Turn PDF pages into PNG images.", intro: "Each PDF page is drawn as a PNG." },
+    { slug: "word-to-pdf", name: "Word to PDF", category: "convert", outputExt: "pdf", cta: "Convert Word to PDF", title: "Word to PDF", description: "Convert a Word file into a PDF.", intro: "Choose a .docx file and download a PDF." },
+    { slug: "image-to-pdf", name: "Image to PDF", category: "convert", outputExt: "pdf", cta: "Create PDF", title: "Image to PDF", description: "Turn photos into a PDF.", intro: "Add photos and download one PDF." },
+    { slug: "image-to-jpg", name: "Image to JPG", category: "convert", outputExt: "jpg", cta: "Convert to JPG", title: "Image to JPG", description: "Convert images to JPG.", intro: "Convert PNG, WEBP, GIF, or HEIC to JPG." },
+    { slug: "heic-to-jpg", name: "HEIC to JPG", category: "convert", outputExt: "jpg", cta: "Convert HEIC to JPG", title: "HEIC to JPG", description: "Convert iPhone HEIC photos to JPG.", intro: "Choose a HEIC photo and download a JPG." },
+    { slug: "extract-images", name: "Extract images from PDF", category: "convert", outputExt: "png", cta: "Extract images", title: "Extract images from PDF", description: "Pull photos stored inside a PDF.", intro: "This finds embedded images." },
+    { slug: "pdf-to-excel", name: "PDF to Excel", category: "convert", outputExt: "xlsx", cta: "Convert PDF to Excel", title: "PDF to Excel Converter", description: "Extract tables from a PDF into an Excel file.", intro: "Tables are detected when the PDF contains them. If none are found, the tool says so." },
+    { slug: "pdf-to-ppt", name: "PDF to PowerPoint", category: "convert", outputExt: "pptx", cta: "Convert PDF to PowerPoint", title: "PDF to PowerPoint Converter", description: "Turn PDF pages into a PowerPoint file.", intro: "Each page becomes a slide image." },
+    { slug: "pdf-to-ebook", name: "PDF to EPUB", category: "convert", outputExt: "epub", cta: "Convert PDF to EPUB", title: "PDF to EPUB Converter", description: "Turn a PDF into an EPUB file.", intro: "Text is packed into a simple EPUB." },
+    { slug: "merge-pdf", name: "Merge PDF", category: "organize", outputExt: "pdf", cta: "Merge PDFs", title: "Merge PDF", description: "Combine PDF files into one.", intro: "Files are merged in the order you add them." },
+    { slug: "split-pdf", name: "Split PDF", category: "organize", outputExt: "pdf", cta: "Split PDF", title: "Split PDF", description: "Extract pages from a PDF.", intro: "Choose a page range or split each page." },
+    { slug: "compress-pdf", name: "Compress PDF", category: "organize", outputExt: "pdf", cta: "Compress PDF", title: "Compress PDF", description: "Reduce PDF file size when the file can actually get smaller.", intro: "If the result is larger, the tool says so." },
+    { slug: "rotate-pdf", name: "Rotate PDF", category: "organize", outputExt: "pdf", cta: "Rotate PDF", title: "Rotate PDF", description: "Rotate PDF pages.", intro: "Choose an angle and download the rotated file." },
+    { slug: "sign-pdf", name: "Sign PDF", category: "edit", outputExt: "pdf", cta: "Sign PDF", title: "Sign PDF", description: "Add a signature that is embedded in the PDF.", intro: "Draw, type, or upload a signature image." },
+    { slug: "protect-pdf", name: "Protect PDF", category: "security", outputExt: "pdf", cta: "Protect PDF", title: "Protect PDF", description: "Password-protect a PDF.", intro: "Set a password you will remember." },
+    { slug: "unlock-pdf", name: "Unlock PDF", category: "security", outputExt: "pdf", cta: "Unlock PDF", title: "Unlock PDF", description: "Remove a password you already know.", intro: "This does not bypass encryption." },
+  ];
+  const createdTools = [];
+  for (const [index, item] of catalog.entries()) {
+    const tool = await prisma.tool.create({
       data: {
-        title: item.title,
+        name: item.name,
         slug: item.slug,
-        excerpt: item.excerpt,
-        contentJson: JSON.stringify(item.content),
-        searchText,
-        status: "published",
-        featured: item.featured,
-        publishedAt: new Date("2026-08-17T12:00:00.000Z"),
-        readingTime: Math.max(2, Math.round(searchText.split(/\s+/).length / 220)),
-        seoTitle: item.seoTitle,
-        seoDescription: item.seoDescription,
-        authorId: author.id,
-        categoryId: categoryMap[item.category].id,
+        processorKey: item.slug,
+        description: item.description,
+        intro: item.intro,
+        category: item.category,
+        outputFormat: item.outputExt || "",
+        status: "live",
+        cta: item.cta,
+        seoTitle: item.title,
+        seoDescription: item.description,
+        sortOrder: index + 1,
       },
     });
-    created.push({ ...item, id: guide.id });
-    for (const name of item.tags) {
-      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      const tag = await prisma.tag.upsert({
-        where: { slug },
-        update: { name },
-        create: { name, slug },
-      });
-      await prisma.guideTag.create({ data: { guideId: guide.id, tagId: tag.id } });
-    }
-    for (const toolSlug of item.tools) {
-      await prisma.guideTool.create({ data: { guideId: guide.id, toolSlug } });
-    }
+    createdTools.push(tool);
+    const deviceCopy = IPHONE_TOOL_INTROS[item.slug];
+    await prisma.toolDevice.create({
+      data: {
+        toolId: tool.id,
+        deviceId: iphone.id,
+        featured: Boolean(deviceCopy?.featured),
+        headline: deviceCopy?.headline || item.name,
+        intro: deviceCopy?.intro || item.intro,
+        sortOrder: deviceCopy?.sortOrder || index + 1,
+      },
+    });
   }
 
-  const bySlug = Object.fromEntries(created.map((item) => [item.slug, item.id]));
-  const relations = [
-    ["how-to-convert-pdf-to-word-on-iphone", "how-to-compress-a-pdf-on-iphone"],
-    ["how-to-convert-pdf-to-word-on-iphone", "how-to-merge-pdf-files-on-iphone"],
-    ["how-to-merge-pdf-files-on-iphone", "how-to-compress-a-pdf-on-iphone"],
-    ["how-to-compress-a-pdf-on-iphone", "how-to-reduce-pdf-file-size-on-iphone"],
-    ["how-to-sign-a-pdf-on-iphone", "how-to-convert-pdf-to-word-on-iphone"],
-    ["how-to-convert-pdf-to-jpg-on-iphone", "how-to-compress-a-pdf-on-iphone"],
-    ["how-to-reduce-pdf-file-size-on-iphone", "how-to-compress-a-pdf-on-iphone"],
-  ];
-  for (const [from, to] of relations) {
-    await prisma.guideRelation.create({ data: { fromId: bySlug[from], toId: bySlug[to] } });
+  const howTo = await prisma.category.create({
+    data: {
+      name: "How-to",
+      slug: "how-to",
+      description: "Step-by-step instructions for PDF tasks.",
+      sortOrder: 1,
+    },
+  });
+  await prisma.category.createMany({
+    data: [
+      { name: "Troubleshooting", slug: "troubleshooting", description: "Fix common PDF problems.", sortOrder: 2 },
+      { name: "Explainers", slug: "explainers", description: "How PDF conversion and related tasks work.", sortOrder: 3 },
+      { name: "Comparisons", slug: "comparisons", description: "Side-by-side notes when two options differ.", sortOrder: 4 },
+      { name: "Privacy & security", slug: "privacy-security", description: "How files are handled in the browser.", sortOrder: 5 },
+    ],
+  });
+
+  const searchText = `how to convert pdf to word on iphone ${JSON.stringify(howToBlocks)}`.toLowerCase();
+
+  const guide = await prisma.guide.create({
+    data: {
+      title: "How to Convert PDF to Word on iPhone",
+      slug: "convert-pdf-to-word-on-iphone",
+        excerpt:
+          "Convert a PDF to Word on iPhone in Safari. Save the file to Files first if it is in Mail or WhatsApp.",
+      template: "HOW_TO",
+      blocksJson: JSON.stringify(howToBlocks),
+      searchText,
+      status: "published",
+      featured: true,
+      publishedAt: new Date("2026-08-17T12:00:00.000Z"),
+      readingTime: 4,
+      seoTitle: "How to Convert PDF to Word on iPhone",
+      seoDescription:
+        "Convert a PDF to Word on iPhone in Safari. Text PDFs convert from embedded text. Scanned pages run OCR in your browser.",
+      authorId: author.id,
+      categoryId: howTo.id,
+      deviceId: iphone.id,
+    },
+  });
+
+  for (const slug of RELATED_TOOL_SLUGS) {
+    const tool = createdTools.find((item) => item.slug === slug);
+    if (tool) await prisma.guideTool.create({ data: { guideId: guide.id, toolId: tool.id } });
   }
 
-  console.log(`Seeded ${created.length} guides`);
+  await prisma.redirect.createMany({
+    data: [
+      { fromPath: "/blog/how-to-convert-pdf-to-word-on-iphone", toPath: "/guides/how-to/convert-pdf-to-word-on-iphone" },
+      { fromPath: "/free-pdf-to-word-iphone-ios", toPath: "/iphone/pdf-to-word" },
+      { fromPath: "/pdf-to-word", toPath: "/iphone/pdf-to-word" },
+    ],
+  });
+
+  console.log("Seeded devices, tools, and the iPhone PDF to Word guide");
 }
 
 main()
