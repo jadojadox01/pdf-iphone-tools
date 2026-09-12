@@ -2,6 +2,11 @@ import Link from "next/link";
 import { getTools } from "@/lib/tools";
 import ToolCard from "./components/ToolCard";
 
+export const metadata = {
+  title: "Page not found",
+  robots: { index: false, follow: true },
+};
+
 export default function NotFound() {
   const tools = getTools().slice(0, 6);
 

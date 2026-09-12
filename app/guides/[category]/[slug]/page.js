@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import BlockRenderer, { extractFaqs } from "../../../components/guides/BlockRenderer";
 import GuideToolbar from "../../../components/guides/GuideToolbar";
 import JsonLd, { breadcrumbJsonLd } from "../../../components/JsonLd";
-import { getPublicGuide, serializeGuide, guidePath } from "@/lib/cms/guides";
+import { getPublicGuide, serializeGuide, guidePath, isPublishedDeviceRecord } from "@/lib/cms/guides";
 import { extractHowToSteps, extractSearchText } from "@/lib/cms/blocks";
 import { pageMetadata } from "@/lib/seo";
 import { estimateReadTime, formatDate } from "@/lib/slug";
@@ -14,17 +14,24 @@ import AdRegion from "../../../components/AdRegion";
 
 export const dynamic = "force-dynamic";
 
+function deviceIsPublic(device) {
+  return isPublishedDeviceRecord(device);
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const guide = await getPublicGuide(slug);
-  if (!guide) return {};
+  if (!guide) {
+    return { robots: { index: false, follow: false }, title: "Guide not found" };
+  }
   const item = serializeGuide(guide);
   const ogImage = guide.ogImage?.url || (guide.ogImageId ? `/api/media/${guide.ogImageId}` : guideCover(guide));
+  const robotsNoIndex = String(guide.robots || "").includes("noindex");
   return pageMetadata({
     title: guide.seoTitle || guide.title,
     description: guide.seoDescription || guide.excerpt,
     path: guide.canonicalUrl || `/guides/${guide.category?.slug || "how-to"}/${guide.slug}`,
-    noIndex: guide.robots?.includes("noindex"),
+    noIndex: robotsNoIndex,
     image: ogImage,
     type: "article",
     keywords: [item.planning?.primaryKeyword, ...(item.planning?.supportingKeywords || [])].filter(Boolean),
@@ -44,7 +51,7 @@ export default async function GuideArticlePage({ params }) {
   const path = guide.canonicalUrl || guidePath(guide);
   const cover = guideCover(guide);
   const crumbs = [{ name: "Home", path: "/" }];
-  if (guide.device) crumbs.push({ name: guide.device.name, path: `/${guide.device.slug}` });
+  if (deviceIsPublic(guide.device)) crumbs.push({ name: guide.device.name, path: `/${guide.device.slug}` });
   crumbs.push({ name: "Guides", path: "/guides" });
   if (guide.category) crumbs.push({ name: guide.category.name, path: `/guides/${guide.category.slug}` });
   crumbs.push({ name: guide.title, path });
@@ -101,7 +108,7 @@ export default async function GuideArticlePage({ params }) {
       <div className="guide-page-inner">
         <nav className="guide-crumbs" aria-label="Breadcrumb">
           <Link href="/">Home</Link>
-          {guide.device && (
+          {deviceIsPublic(guide.device) && (
             <>
               <span>/</span>
               <Link href={`/${guide.device.slug}`}>{guide.device.name}</Link>

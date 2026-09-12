@@ -1,12 +1,13 @@
 import { DeviceHub } from "../components/DeviceHub";
-import { pageMetadata } from "@/lib/seo";
+import { deviceHubMetadata, requirePublishedDevice } from "@/lib/device-page";
 
-export const metadata = pageMetadata({
-  title: "PDF tools for Android",
-  path: "/android",
-  noIndex: true,
-});
+export const dynamic = "force-dynamic";
 
-export default function AndroidPage() {
+export async function generateMetadata() {
+  return deviceHubMetadata("android", "PDF tools for Android");
+}
+
+export default async function AndroidPage() {
+  await requirePublishedDevice("android");
   return <DeviceHub slug="android" />;
 }

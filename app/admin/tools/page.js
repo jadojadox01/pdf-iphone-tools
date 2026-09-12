@@ -110,7 +110,24 @@ export default function AdminToolsPage() {
               />{" "}
               Featured on the iPhone hub
             </label>
-            <p className="help">{tool._count?.guides || 0} linked guides</p>
+            <p className="help">
+              {(tool.guides || []).filter((item) => item.guide?.status === "published").length} published guides ·{" "}
+              {tool._count?.guides || 0} linked in CMS
+            </p>
+            {(tool.guides || []).length ? (
+              <ul className="help">
+                {tool.guides.map((item) =>
+                  item.guide ? (
+                    <li key={item.guide.id}>
+                      <Link href={`/admin/guides/${item.guide.id}`}>{item.guide.title}</Link>
+                      {item.guide.status === "published" ? " (published)" : ` (${item.guide.status})`}
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+            ) : (
+              <p className="help">No guides linked yet. Link them from the guide editor. Do not invent a public page.</p>
+            )}
             <button type="button" className="btn btn-secondary" onClick={() => save(tool)}>
               Save
             </button>

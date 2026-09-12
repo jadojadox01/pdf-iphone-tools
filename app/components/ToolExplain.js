@@ -170,7 +170,7 @@ export default function ToolExplain({ explain, related = [], relatedGuides = [],
 
       {relatedGuides.length ? (
         <section className="section">
-          <h2>Related guides</h2>
+          <h2>Guides for this tool</h2>
           <div className="stack-links">
             {relatedGuides.map((guide) => (
               <Link key={guide.id || guide.slug} href={guide.path || guidePath(guide)}>

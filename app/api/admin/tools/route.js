@@ -12,7 +12,17 @@ export async function GET() {
   const catalog = getTools();
   const tools = await prisma.tool.findMany({
     orderBy: { sortOrder: "asc" },
-    include: { devices: { include: { device: true } }, _count: { select: { guides: true } } },
+    include: {
+      devices: { include: { device: true } },
+      _count: { select: { guides: true } },
+      guides: {
+        include: {
+          guide: {
+            select: { id: true, title: true, slug: true, status: true, category: { select: { slug: true } } },
+          },
+        },
+      },
+    },
   });
   return NextResponse.json({
     tools: tools.map((tool) => ({

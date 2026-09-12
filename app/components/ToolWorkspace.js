@@ -64,9 +64,11 @@ export default function ToolWorkspace({ tool }) {
       setResult({ ...output, url });
       setStatus("");
     } catch (err) {
+      const message = String(err?.message || "");
+      const looksLikeStack = /\n\s+at\s+/.test(message);
       setError({
         code: err.code || "CONVERSION_FAILED",
-        title: err.message || "Processing failed",
+        title: looksLikeStack || !message ? "Something went wrong while processing this file." : message,
         hint: err.hint || "Check the file and try again.",
       });
     } finally {

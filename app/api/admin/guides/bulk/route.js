@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { adminGuard } from "@/lib/admin-guard";
 import { getGuidePlanning, publishBlockReason } from "@/lib/cms/planning";
+import { robotsForStatus } from "@/lib/cms/guides";
 
 export async function POST(request) {
   const denied = await adminGuard();
@@ -24,19 +25,24 @@ export async function POST(request) {
       }
       await prisma.guide.update({
         where: { id: item.id },
-        data: { status: "published", publishedAt: item.publishedAt || new Date(), scheduledAt: null },
+        data: {
+          status: "published",
+          publishedAt: item.publishedAt || new Date(),
+          scheduledAt: null,
+          robots: robotsForStatus("published"),
+        },
       });
     }
     return NextResponse.json({ ok: true, skipped });
   } else if (body.action === "unpublish") {
     await prisma.guide.updateMany({
       where: { id: { in: ids }, deletedAt: null },
-      data: { status: "unpublished" },
+      data: { status: "unpublished", robots: robotsForStatus("unpublished") },
     });
   } else if (body.action === "delete") {
     await prisma.guide.updateMany({
       where: { id: { in: ids } },
-      data: { deletedAt: new Date(), status: "unpublished" },
+      data: { deletedAt: new Date(), status: "unpublished", robots: robotsForStatus("unpublished") },
     });
   } else {
     return NextResponse.json({ error: "Unknown action." }, { status: 400 });

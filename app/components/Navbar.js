@@ -8,7 +8,7 @@ import { toolPath } from "@/lib/paths";
 import { DEVICE_HUBS } from "@/lib/devices";
 import { Icon } from "./Icons";
 
-export default function Navbar() {
+export default function Navbar({ publishedDeviceSlugs = [] }) {
   const [open, setOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [devicesOpen, setDevicesOpen] = useState(false);
@@ -131,21 +131,24 @@ export default function Navbar() {
               <Icon name="chevron" size={16} className="nav-chevron" />
             </button>
             <div className="tools-panel devices-panel" role="menu">
-              {DEVICE_HUBS.map((device) => (
+              {DEVICE_HUBS.map((device) => {
+                const live = publishedDeviceSlugs.includes(device.slug);
+                return (
                 <Link
                   key={device.slug}
-                  href={device.status === "live" ? `/${device.slug}` : "/tools"}
+                  href={live ? `/${device.slug}` : "/tools"}
                   onClick={() => setDevicesOpen(false)}
                 >
                   <span className="nav-item-label">
                     <Icon name={device.slug} size={16} />
                     {device.name}
                   </span>
-                  {device.status !== "live" ? (
+                  {!live ? (
                     <span className="nav-tool-def">Same tools in the browser — no separate page yet</span>
                   ) : null}
                 </Link>
-              ))}
+                );
+              })}
             </div>
           </div>
           <Link href="/about">About</Link>
@@ -203,19 +206,22 @@ export default function Navbar() {
           Guides
         </Link>
         <p className="mobile-menu-label">Devices</p>
-        {DEVICE_HUBS.map((device) => (
+        {DEVICE_HUBS.map((device) => {
+          const live = publishedDeviceSlugs.includes(device.slug);
+          return (
           <Link
             key={device.slug}
-            href={device.status === "live" ? `/${device.slug}` : "/tools"}
+            href={live ? `/${device.slug}` : "/tools"}
             onClick={() => setOpen(false)}
           >
             <span className="nav-item-label">
               <Icon name={device.slug} size={18} />
               {device.name}
-              {device.status !== "live" ? " (browser tools)" : ""}
+              {!live ? " (browser tools)" : ""}
             </span>
           </Link>
-        ))}
+          );
+        })}
         <Link href="/about" onClick={() => setOpen(false)}>
           About
         </Link>

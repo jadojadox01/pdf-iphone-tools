@@ -26,33 +26,60 @@ function LinkList({ items }) {
 
 export default async function HtmlSitemapPage() {
   const directory = await getPublicDirectory();
+  const howTo = directory.groupedGuides.find((group) => group.slug === "how-to");
+  const troubleshooting = directory.groupedGuides.find((group) => group.slug === "troubleshooting");
+  const otherGuideGroups = directory.groupedGuides.filter(
+    (group) => group.slug !== "how-to" && group.slug !== "troubleshooting" && group.guides.length,
+  );
+  const popular = [
+    ...(directory.deviceSections[0] ? [{ href: directory.deviceSections[0].href, name: directory.deviceSections[0].name }] : []),
+    ...directory.popularTools.slice(0, 5),
+    ...directory.featured,
+  ];
 
   return (
     <div className="wrap sitemap-page" style={{ padding: "32px 0 64px" }}>
       <h1>Sitemap</h1>
-      <p className="lede">
-        A directory of public pages on this site. Search engines also have an XML sitemap at{" "}
-        <Link href="/sitemap.xml">/sitemap.xml</Link>.
-      </p>
+      <p className="lede">Public pages on this site. Drafts, admin screens, and empty sections are not listed.</p>
 
       <section className="section">
         <h2>PDF tools</h2>
+        <p>
+          <Link href="/tools">All PDF tools</Link>
+        </p>
         <LinkList items={directory.tools} />
       </section>
 
-      {directory.deviceSections.map((device) => (
-        <section className="section" key={device.slug}>
-          <h2>Tools by device — {device.name}</h2>
-          <p>
-            <Link href={device.href}>{device.name} overview</Link>
-          </p>
-          <LinkList items={device.tools} />
-        </section>
-      ))}
+      <section className="section">
+        <h2>Guides</h2>
+        <p>
+          <Link href="/guides">All guides</Link>
+        </p>
+      </section>
 
-      {directory.groupedGuides.map((group) => (
+      {howTo?.guides?.length ? (
+        <section className="section">
+          <h2>How-to guides</h2>
+          <p>
+            <Link href={howTo.href}>All how-to guides</Link>
+          </p>
+          <LinkList items={howTo.guides} />
+        </section>
+      ) : null}
+
+      {troubleshooting?.guides?.length ? (
+        <section className="section">
+          <h2>Troubleshooting</h2>
+          <p>
+            <Link href={troubleshooting.href}>All troubleshooting guides</Link>
+          </p>
+          <LinkList items={troubleshooting.guides} />
+        </section>
+      ) : null}
+
+      {otherGuideGroups.map((group) => (
         <section className="section" key={group.slug}>
-          <h2>{group.name} guides</h2>
+          <h2>{group.name}</h2>
           <p>
             <Link href={group.href}>All {group.name.toLowerCase()} guides</Link>
           </p>
@@ -60,10 +87,24 @@ export default async function HtmlSitemapPage() {
         </section>
       ))}
 
-      {directory.featured.length > 0 && (
+      {directory.deviceSections.length > 0 && (
         <section className="section">
-          <h2>Popular guides</h2>
-          <LinkList items={directory.featured} />
+          <h2>Tools by device</h2>
+          {directory.deviceSections.map((device) => (
+            <div key={device.slug}>
+              <p>
+                <Link href={device.href}>{device.name} overview</Link>
+              </p>
+              <LinkList items={device.tools} />
+            </div>
+          ))}
+        </section>
+      )}
+
+      {popular.length > 0 && (
+        <section className="section">
+          <h2>Popular resources</h2>
+          <LinkList items={popular} />
         </section>
       )}
 

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import JsonLd, { breadcrumbJsonLd } from "./JsonLd";
 import ToolCard from "./ToolCard";
 import { getTool } from "@/lib/tools";
-import { toolPath, IPHONE_TOOL_PAGES } from "@/lib/paths";
+import { hasDeviceToolPage, toolPath } from "@/lib/paths";
 import { getPublishedDevice, getPublicGuides, serializeGuideCard } from "@/lib/cms/guides";
 import GuideCard from "./guides/GuideCard";
 
@@ -13,12 +13,15 @@ export async function DeviceHub({ slug }) {
   const featured = device.tools.find((item) => item.featured);
   const featuredTool = featured ? getTool(featured.tool.slug) : null;
   const { guides } = await getPublicGuides({ take: 6, deviceSlug: slug });
-  const cluster = device.tools
+  const paired = device.tools
     .map((item) => ({ ...item, catalog: getTool(item.tool.slug) }))
-    .filter((item) => item.catalog && IPHONE_TOOL_PAGES.includes(item.tool.slug));
-  const more = device.tools
-    .map((item) => ({ ...item, catalog: getTool(item.tool.slug) }))
-    .filter((item) => item.catalog && !IPHONE_TOOL_PAGES.includes(item.tool.slug));
+    .filter((item) => item.catalog);
+  const cluster =
+    slug === "iphone"
+      ? paired.filter((item) => hasDeviceToolPage(slug, item.tool.slug))
+      : paired.slice(0, 6);
+  const clusterSlugs = new Set(cluster.map((item) => item.tool.slug));
+  const more = paired.filter((item) => !clusterSlugs.has(item.tool.slug));
 
   return (
     <div className="wrap" style={{ padding: "28px 0 64px" }}>

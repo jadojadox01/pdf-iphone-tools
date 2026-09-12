@@ -3,6 +3,7 @@ import Footer from "./components/Footer";
 import Analytics from "./components/Analytics";
 import CookieNotice from "./components/CookieNotice";
 import { defaultMetadata } from "@/lib/seo";
+import { getPublishedDevices } from "@/lib/cms/guides";
 import "./globals.css";
 
 export const metadata = defaultMetadata;
@@ -13,7 +14,14 @@ export const viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  let publishedDeviceSlugs = [];
+  try {
+    publishedDeviceSlugs = (await getPublishedDevices()).map((device) => device.slug);
+  } catch {
+    publishedDeviceSlugs = ["iphone"];
+  }
+
   return (
     <html lang="en">
       <head>
@@ -32,11 +40,11 @@ export default function RootLayout({ children }) {
         </a>
         <Analytics />
         <div className="site-shell">
-          <Navbar />
+          <Navbar publishedDeviceSlugs={publishedDeviceSlugs} />
           <main id="main" className="site-main">
             {children}
           </main>
-          <Footer />
+          <Footer publishedDeviceSlugs={publishedDeviceSlugs} />
         </div>
         <CookieNotice />
       </body>

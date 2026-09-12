@@ -1,12 +1,13 @@
 import { DeviceHub } from "../components/DeviceHub";
-import { pageMetadata } from "@/lib/seo";
+import { deviceHubMetadata, requirePublishedDevice } from "@/lib/device-page";
 
-export const metadata = pageMetadata({
-  title: "PDF tools for Mac",
-  path: "/mac",
-  noIndex: true,
-});
+export const dynamic = "force-dynamic";
 
-export default function MacPage() {
+export async function generateMetadata() {
+  return deviceHubMetadata("mac", "PDF tools for Mac");
+}
+
+export default async function MacPage() {
+  await requirePublishedDevice("mac");
   return <DeviceHub slug="mac" />;
 }

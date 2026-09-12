@@ -5,9 +5,11 @@ import { toolPath } from "@/lib/paths";
 import { DEVICE_HUBS } from "@/lib/devices";
 import CookieSettingsLink from "./CookieSettingsLink";
 
-export default function Footer() {
+export default function Footer({ publishedDeviceSlugs = [] }) {
   const year = new Date().getFullYear();
   const tools = getTools();
+  const liveHubs = DEVICE_HUBS.filter((device) => publishedDeviceSlugs.includes(device.slug));
+  const pendingHubs = DEVICE_HUBS.filter((device) => !publishedDeviceSlugs.includes(device.slug));
 
   return (
     <footer className="footer">
@@ -37,16 +39,18 @@ export default function Footer() {
         </div>
         <div>
           <strong>Devices</strong>
-          {DEVICE_HUBS.map((device) => (
-            <Link key={device.slug} href={device.status === "live" ? `/${device.slug}` : "/tools"}>
+          {liveHubs.map((device) => (
+            <Link key={device.slug} href={`/${device.slug}`}>
               {device.name}
             </Link>
           ))}
+          {pendingHubs.length ? (
+            <Link href="/tools">{pendingHubs.map((device) => device.name).join(", ")} (browser tools)</Link>
+          ) : null}
         </div>
         <div>
           <strong>Site</strong>
           <Link href="/guides">Guides</Link>
-          <Link href="/search">Search</Link>
           <Link href="/about">About</Link>
           <Link href="/contact">Contact</Link>
           <Link href="/sitemap">Sitemap</Link>

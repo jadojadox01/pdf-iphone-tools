@@ -1,12 +1,13 @@
 import { DeviceHub } from "../components/DeviceHub";
-import { pageMetadata } from "@/lib/seo";
+import { deviceHubMetadata, requirePublishedDevice } from "@/lib/device-page";
 
-export const metadata = pageMetadata({
-  title: "PDF tools for Windows",
-  path: "/windows",
-  noIndex: true,
-});
+export const dynamic = "force-dynamic";
 
-export default function WindowsPage() {
+export async function generateMetadata() {
+  return deviceHubMetadata("windows", "PDF tools for Windows");
+}
+
+export default async function WindowsPage() {
+  await requirePublishedDevice("windows");
   return <DeviceHub slug="windows" />;
 }

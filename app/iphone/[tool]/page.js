@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import ToolWorkspace from "../../components/ToolWorkspace";
 import ToolExplain from "../../components/ToolExplain";
 import JsonLd, { breadcrumbJsonLd, definedTermJsonLd, faqJsonLd } from "../../components/JsonLd";
@@ -19,6 +19,10 @@ export async function generateMetadata({ params }) {
   if (!tool || !hasDeviceToolPage("iphone", tool.slug)) {
     return { robots: { index: false, follow: true } };
   }
+  const device = await getPublishedDevice("iphone").catch(() => null);
+  if (!device) {
+    return { robots: { index: false, follow: true } };
+  }
   const copy = getIphoneToolCopy(tool.slug);
   return toolMetadata(
     {
@@ -34,9 +38,10 @@ export default async function IphoneToolPage({ params }) {
   const { tool: toolSlug } = await params;
   const device = await getPublishedDevice("iphone").catch(() => null);
   const tool = getTool(toolSlug);
-  if (!tool || !device) notFound();
+  if (!tool) notFound();
+  if (!device) redirect(toolPath(tool.slug));
   const pairing = device.tools.find((item) => item.tool.slug === tool.slug);
-  if (!pairing) notFound();
+  if (!pairing) redirect(toolPath(tool.slug));
   if (!hasDeviceToolPage("iphone", tool.slug)) permanentRedirect(toolPath(tool.slug));
   const copy = getIphoneToolCopy(tool.slug);
   const explain = await loadToolExplain(tool, { device: "iphone" });

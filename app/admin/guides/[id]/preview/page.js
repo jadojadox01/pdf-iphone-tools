@@ -3,7 +3,11 @@ import { prisma } from "@/lib/db";
 import BlockRenderer from "../../../../components/guides/BlockRenderer";
 import { serializeGuide } from "@/lib/cms/guides";
 
-export const metadata = { title: "Guide preview", robots: { index: false, follow: false } };
+export const metadata = {
+  title: "Guide preview",
+  robots: { index: false, follow: false },
+  other: { "X-Robots-Tag": "noindex, nofollow" },
+};
 
 export default async function GuidePreviewPage({ params }) {
   const { id } = await params;

@@ -36,7 +36,7 @@ export default function AdminDevicesPage() {
       <h1>Devices</h1>
       <p className="help">
         A device hub should exist only when the copy helps someone using that device. Do not publish Android, Windows, or
-        Mac by swapping the word “iPhone”.
+        Mac by swapping the word “iPhone”. Unpublished hubs redirect visitors to /tools instead of showing an empty page.
       </p>
       {error && <div className="alert alert-error">{error}</div>}
       {devices.map((device) => (

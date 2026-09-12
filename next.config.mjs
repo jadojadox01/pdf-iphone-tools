@@ -24,6 +24,7 @@ const TOOL_REDIRECTS = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  trailingSlash: false,
   serverExternalPackages: ["exceljs", "@prisma/client", "tesseract.js"],
   transpilePackages: ["pdfjs-dist", "heic2any"],
   outputFileTracingIncludes: {
@@ -84,24 +85,12 @@ const nextConfig = {
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
       {
-        source: "/admin/:path*",
+        source: "/admin",
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
       {
-        source: "/authors/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
-      },
-      {
-        source: "/android",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
-      },
-      {
-        source: "/windows",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
-      },
-      {
-        source: "/mac",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
+        source: "/admin/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
       {
         source: "/xml-sitemap",

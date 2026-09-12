@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { adminGuard } from "@/lib/admin-guard";
-import { buildGuideRecord, saveRevision, syncGuideRelations } from "@/lib/cms/guides";
+import { buildGuideRecord, robotsForStatus, saveRevision, syncGuideRelations } from "@/lib/cms/guides";
 import { getGuidePlanning, publishBlockReason } from "@/lib/cms/planning";
 
 function includeGuide() {
@@ -69,7 +69,7 @@ export async function DELETE(request, { params }) {
   const { id } = await params;
   await prisma.guide.update({
     where: { id },
-    data: { deletedAt: new Date(), status: "unpublished" },
+    data: { deletedAt: new Date(), status: "unpublished", robots: "noindex,follow" },
   });
   return NextResponse.json({ ok: true });
 }
@@ -93,6 +93,7 @@ export async function PATCH(request, { params }) {
         searchText: existing.searchText,
         status: "draft",
         featured: false,
+        robots: "noindex,follow",
         readingTime: existing.readingTime,
         seoTitle: existing.seoTitle,
         seoDescription: existing.seoDescription,
@@ -133,8 +134,10 @@ export async function PATCH(request, { params }) {
     data.status = "published";
     data.publishedAt = existing.publishedAt || new Date();
     data.scheduledAt = null;
+    data.robots = robotsForStatus("published", existing.robots);
   } else if (status === "unpublished" || status === "draft" || status === "scheduled" || status === "archived") {
     data.status = status;
+    data.robots = robotsForStatus(status, existing.robots);
     if (status === "scheduled") data.scheduledAt = body.scheduledAt ? new Date(body.scheduledAt) : existing.scheduledAt;
   }
   const guide = await prisma.guide.update({ where: { id }, data });
