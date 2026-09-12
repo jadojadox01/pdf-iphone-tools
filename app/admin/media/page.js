@@ -59,12 +59,12 @@ export default function AdminMediaPage() {
   return (
     <div className="admin-page">
       <h1>Media</h1>
-      <p className="help">JPEG, PNG, WebP, and GIF only. Maximum 4 MB. Use screenshots that actually help the article.</p>
+      <p className="help">JPEG, PNG, WebP, GIF, or SVG. Maximum 4 MB. Use a real screenshot or a clearly designed diagram.</p>
       {error && <div className="alert alert-error">{error}</div>}
       <form className="workspace" onSubmit={upload}>
         <label className="field">
           File
-          <input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required />
+          <input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" required />
         </label>
         <label className="field">
           Alt text

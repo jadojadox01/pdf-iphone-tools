@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { adminGuard } from "@/lib/admin-guard";
+import { persistMediaFile, serializeMedia } from "@/lib/media-store";
 
-const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"]);
 const MAX_BYTES = 4 * 1024 * 1024;
 
 export async function GET(request) {
@@ -26,6 +27,7 @@ export async function GET(request) {
       mimeType: true,
       alt: true,
       caption: true,
+      url: true,
       width: true,
       height: true,
       size: true,
@@ -33,7 +35,7 @@ export async function GET(request) {
     },
   });
   return NextResponse.json({
-    media: media.map((item) => ({ ...item, url: `/api/media/${item.id}` })),
+    media: media.map(serializeMedia),
   });
 }
 
@@ -46,13 +48,13 @@ export async function POST(request) {
     return NextResponse.json({ error: "Choose an image file." }, { status: 400 });
   }
   if (!ALLOWED.has(file.type)) {
-    return NextResponse.json({ error: "Only JPEG, PNG, WebP, and GIF images are allowed." }, { status: 400 });
+    return NextResponse.json({ error: "Use a JPEG, PNG, WebP, GIF, or SVG image." }, { status: 400 });
   }
   if (file.size > MAX_BYTES) {
     return NextResponse.json({ error: "Images must be 4 MB or smaller." }, { status: 400 });
   }
   const bytes = Buffer.from(await file.arrayBuffer());
-  const media = await prisma.media.create({
+  const created = await prisma.media.create({
     data: {
       filename: file.name.slice(0, 120),
       mimeType: file.type,
@@ -62,13 +64,12 @@ export async function POST(request) {
       data: bytes,
     },
   });
+  const url = await persistMediaFile(created.id, bytes, file.type, file.name);
+  const media = await prisma.media.update({
+    where: { id: created.id },
+    data: { url },
+  });
   return NextResponse.json({
-    media: {
-      id: media.id,
-      filename: media.filename,
-      alt: media.alt,
-      caption: media.caption,
-      url: `/api/media/${media.id}`,
-    },
+    media: serializeMedia(media),
   });
 }

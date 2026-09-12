@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import BlockRenderer from "../../../../components/guides/BlockRenderer";
+import GuideFeaturedImage from "../../../../components/guides/GuideFeaturedImage";
 import { serializeGuide } from "@/lib/cms/guides";
 
 export const metadata = {
@@ -28,6 +29,7 @@ export default async function GuidePreviewPage({ params }) {
   return (
     <div className="admin-preview wrap" style={{ padding: "32px 0 64px" }}>
       <p className="alert alert-warn">Preview only. This draft is not indexed and is not a public URL.</p>
+      <GuideFeaturedImage guide={guide} title={guide.title} />
       <h1>{guide.title}</h1>
       {guide.excerpt ? <p className="lede">{guide.excerpt}</p> : null}
       {guide.author ? <p className="guide-byline">By {guide.author.name}</p> : null}

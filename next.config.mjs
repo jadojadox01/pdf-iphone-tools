@@ -33,6 +33,7 @@ const nextConfig = {
     "/iphone/**": ["./data/cms.db"],
     "/authors/**": ["./data/cms.db"],
     "/api/**": ["./data/cms.db"],
+    "/media/**": ["./data/cms.db"],
     "/xml-sitemap": ["./data/cms.db"],
   },
   async redirects() {

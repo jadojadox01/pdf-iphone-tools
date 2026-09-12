@@ -11,6 +11,8 @@ import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import { guideCover } from "@/lib/guides/cover";
 import { getGuideViews } from "@/lib/guide-views";
 import AdRegion from "../../../components/AdRegion";
+import GuideFeaturedImage from "../../../components/guides/GuideFeaturedImage";
+import { mediaSrcFromGuide } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +27,7 @@ export async function generateMetadata({ params }) {
     return { robots: { index: false, follow: false }, title: "Guide not found" };
   }
   const item = serializeGuide(guide);
-  const ogImage = guide.ogImage?.url || (guide.ogImageId ? `/api/media/${guide.ogImageId}` : guideCover(guide));
+  const ogImage = guide.ogImage?.url || mediaSrcFromGuide(guide) || (guide.ogImageId ? `/media/${guide.ogImageId}` : guideCover(guide));
   const robotsNoIndex = String(guide.robots || "").includes("noindex");
   return pageMetadata({
     title: guide.seoTitle || guide.title,
@@ -124,13 +126,7 @@ export default async function GuideArticlePage({ params }) {
           )}
         </nav>
 
-        {guide.featuredImage ? (
-          <figure className="guide-hero">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={cover} alt={guide.featuredImage.alt || guide.title} />
-            {guide.featuredImage.caption ? <figcaption>{guide.featuredImage.caption}</figcaption> : null}
-          </figure>
-        ) : null}
+        <GuideFeaturedImage guide={guide} title={guide.title} />
 
         {guide.category && <p className="guide-kicker">{guide.category.name}</p>}
         <div className="guide-title-row">

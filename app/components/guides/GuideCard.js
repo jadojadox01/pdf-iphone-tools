@@ -13,7 +13,7 @@ export default function GuideCard({ guide, featured = false }) {
     <Link className={`guide-card${featured ? " guide-card-featured" : ""}`} href={href}>
       <span className="guide-card-media">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={cover} alt="" />
+        <img src={cover} alt={guide.featuredImage?.alt || ""} />
       </span>
       <span className="guide-card-body">
         <strong>{guide.title}</strong>

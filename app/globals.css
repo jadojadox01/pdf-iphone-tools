@@ -2339,8 +2339,9 @@ body.word-writing {
 
 .guide-card-media {
   display: block;
-  width: 72px;
-  height: 54px;
+  width: 96px;
+  height: 72px;
+  flex: 0 0 96px;
   border-radius: 8px;
   background: var(--bg-alt);
   overflow: hidden;
@@ -2489,6 +2490,13 @@ body.word-writing {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.guide-hero figcaption {
+  margin: 0;
+  padding: 10px 14px 12px;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .guide-kicker {

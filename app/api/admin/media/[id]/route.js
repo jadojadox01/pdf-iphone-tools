@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { adminGuard } from "@/lib/admin-guard";
+import { serializeMedia } from "@/lib/media-store";
 
 export async function PATCH(request, { params }) {
   const denied = await adminGuard();
@@ -13,9 +14,8 @@ export async function PATCH(request, { params }) {
       alt: body.alt != null ? String(body.alt) : undefined,
       caption: body.caption != null ? String(body.caption) : undefined,
     },
-    select: { id: true, alt: true, caption: true, filename: true },
   });
-  return NextResponse.json({ media: { ...media, url: `/api/media/${media.id}` } });
+  return NextResponse.json({ media: serializeMedia(media) });
 }
 
 export async function DELETE(request, { params }) {

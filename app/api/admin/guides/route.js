@@ -8,7 +8,7 @@ function includeGuide() {
   return {
     author: true,
     category: true,
-    featuredImage: { select: { id: true, alt: true, caption: true } },
+    featuredImage: { select: { id: true, alt: true, caption: true, url: true } },
     tags: { include: { tag: true } },
     relatedTools: true,
     relatedFrom: { select: { toId: true } },

@@ -8,7 +8,7 @@ function includeGuide() {
   return {
     author: true,
     category: true,
-    featuredImage: { select: { id: true, alt: true, caption: true } },
+    featuredImage: { select: { id: true, alt: true, caption: true, url: true } },
     tags: { include: { tag: true } },
     relatedTools: { include: { tool: true } },
     relatedFrom: { select: { toId: true } },
@@ -97,6 +97,8 @@ export async function PATCH(request, { params }) {
         readingTime: existing.readingTime,
         seoTitle: existing.seoTitle,
         seoDescription: existing.seoDescription,
+        featuredImageId: existing.featuredImageId,
+        ogImageId: existing.ogImageId,
         authorId: existing.authorId,
         categoryId: existing.categoryId,
         deviceId: existing.deviceId,
