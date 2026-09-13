@@ -61,7 +61,7 @@ export default function AdminAuthorsPage() {
     <div className="admin-page">
       <h1>Authors</h1>
       <p className="help">
-        Use a real name or “PDFFlow”. Only write credentials, years, companies, or awards that are true. Leave the bio short if you have nothing extra to say.
+        The site author is NIYOMUHOZA Jean de Dieu, founder and editor of PDFFlow. Only write credentials, years, companies, or awards that are true.
       </p>
       {error && <div className="alert alert-error">{error}</div>}
       <form className="workspace" onSubmit={create}>

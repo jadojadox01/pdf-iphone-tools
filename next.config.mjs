@@ -47,6 +47,7 @@ const nextConfig = {
       { source: "/blog", destination: "/guides", permanent: true },
       { source: "/blog/:slug", destination: "/guides/:slug", permanent: true },
       { source: "/guides/category/:slug", destination: "/guides/:slug", permanent: true },
+      { source: "/authors/editorial", destination: "/authors/niyomuhoza-jean-de-dieu", permanent: true },
       { source: "/pdf-to-word", destination: "/iphone/pdf-to-word", permanent: true },
       { source: "/free-pdf-to-word-iphone", destination: "/iphone/pdf-to-word", permanent: true },
       { source: "/free-pdf-to-word-iphone-ios", destination: "/iphone/pdf-to-word", permanent: true },

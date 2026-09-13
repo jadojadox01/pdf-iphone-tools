@@ -1,4 +1,5 @@
 import { SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
+import { SITE_AUTHOR, authorBioParagraphs } from "@/lib/cms/site-author";
 
 export default function JsonLd({ data }) {
   return (
@@ -7,6 +8,16 @@ export default function JsonLd({ data }) {
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );
+}
+
+function siteAuthorPerson() {
+  return {
+    "@type": "Person",
+    name: SITE_AUTHOR.name,
+    jobTitle: SITE_AUTHOR.role || undefined,
+    description: authorBioParagraphs(SITE_AUTHOR.bio).join(" "),
+    url: absoluteUrl(`/authors/${SITE_AUTHOR.slug}`),
+  };
 }
 
 export function webAppJsonLd() {
@@ -19,6 +30,7 @@ export function webAppJsonLd() {
     image: absoluteUrl("/brand/logo-mark.png"),
     applicationCategory: "UtilitiesApplication",
     operatingSystem: "iOS, Android, Windows, macOS, Linux",
+    author: siteAuthorPerson(),
     offers: {
       "@type": "Offer",
       price: "0",
@@ -44,6 +56,13 @@ export function websiteJsonLd() {
     url: SITE_URL,
     description:
       "PDFFlow is a website of PDF tools that run in your browser. Convert, merge, split, compress, sign, and protect PDFs without installing an app.",
+    author: siteAuthorPerson(),
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      founder: siteAuthorPerson(),
+    },
     potentialAction: {
       "@type": "SearchAction",
       target: `${SITE_URL}/search?q={search_term_string}`,

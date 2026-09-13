@@ -1,10 +1,21 @@
+/**
+ * Legacy importer for the unpublished iPhone-first drafts.
+ * Do not use this to create more device-keyword pages.
+ * New guides should be tool-centered PDFFlow pages from the canonical topic roadmap.
+ */
 import { prisma } from "../lib/db.js";
 import { IPHONE_FIRST_EIGHT } from "../lib/cms/drafts/iphone-first-eight.js";
 import { emptyPlanning } from "../lib/cms/planning.js";
 import { extractSearchText, withPlanningBlock } from "../lib/cms/blocks.js";
 
 async function main() {
-  const author = (await prisma.author.findFirst({ where: { slug: "editorial" } })) || (await prisma.author.findFirst());
+  console.warn(
+    "This importer is for the old unpublished iPhone drafts only. Do not use it to create more device-keyword pages.",
+  );
+  const author =
+    (await prisma.author.findFirst({ where: { slug: "niyomuhoza-jean-de-dieu" } })) ||
+    (await prisma.author.findFirst({ where: { slug: "editorial" } })) ||
+    (await prisma.author.findFirst());
   const category = await prisma.category.findFirst({ where: { slug: "how-to" } });
   const device = await prisma.device.findFirst({ where: { slug: "iphone" } });
   if (!author || !category || !device) {

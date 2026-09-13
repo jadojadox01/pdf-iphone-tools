@@ -21,6 +21,7 @@ import { CONTENT_PIPELINE, OWNED_DEVICES, TOOL_GUIDE_SECTIONS } from "@/lib/cms/
 import { getCanonicalTopic, getFoldedResearch, TOPIC_ROADMAP } from "@/lib/cms/topics";
 import { getTools } from "@/lib/tools";
 import { SITE_URL } from "@/lib/site";
+import { SITE_AUTHOR } from "@/lib/cms/site-author";
 import { slugify } from "@/lib/slug";
 
 const defaultGuide = {
@@ -68,6 +69,13 @@ export default function GuideForm({ guideId }) {
       .then((response) => response.json())
       .then((data) => setMeta(data));
   }, []);
+
+  useEffect(() => {
+    if (guideId) return;
+    const preferred = (meta.authors || []).find((item) => item.slug === SITE_AUTHOR.slug);
+    if (!preferred) return;
+    setGuide((current) => (current.authorId ? current : { ...current, authorId: preferred.id }));
+  }, [guideId, meta.authors]);
 
   useEffect(() => {
     if (!guideId) return;

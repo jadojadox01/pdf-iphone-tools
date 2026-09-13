@@ -1,7 +1,27 @@
 const { PrismaClient } = require("@prisma/client");
 const { howToBlocks, IPHONE_TOOL_INTROS, RELATED_TOOL_SLUGS } = require("../prisma/content/iphone-pdf-to-word-guide");
+const SITE_AUTHOR = require("../prisma/content/site-author.json");
 
 const prisma = new PrismaClient();
+
+async function ensureSiteAuthor() {
+  const existing =
+    (await prisma.author.findUnique({ where: { slug: SITE_AUTHOR.slug } })) ||
+    (await prisma.author.findUnique({ where: { slug: "editorial" } })) ||
+    (await prisma.author.findFirst({ where: { name: "PDFFlow" } }));
+  const author = existing
+    ? await prisma.author.update({ where: { id: existing.id }, data: SITE_AUTHOR })
+    : await prisma.author.create({ data: SITE_AUTHOR });
+  if (existing && existing.slug && existing.slug !== SITE_AUTHOR.slug) {
+    await prisma.redirect.upsert({
+      where: { fromPath: `/authors/${existing.slug}` },
+      update: { toPath: `/authors/${SITE_AUTHOR.slug}`, statusCode: 301 },
+      create: { fromPath: `/authors/${existing.slug}`, toPath: `/authors/${SITE_AUTHOR.slug}`, statusCode: 301 },
+    });
+  }
+  await prisma.guide.updateMany({ where: { authorId: null, deletedAt: null }, data: { authorId: author.id } });
+  return author;
+}
 
 async function main() {
   const iphone = await prisma.device.findUnique({ where: { slug: "iphone" } });
@@ -9,14 +29,7 @@ async function main() {
     throw new Error("No iPhone device in the CMS. Run npm run db:seed first.");
   }
 
-  await prisma.author.updateMany({
-    where: { slug: "editorial" },
-    data: {
-      name: "PDFFlow",
-      role: "Editor",
-      bio: "Publishes the guides on this site.",
-    },
-  });
+  await ensureSiteAuthor();
 
   await prisma.category.updateMany({
     where: { slug: "how-to" },

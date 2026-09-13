@@ -23,12 +23,7 @@ async function main() {
   });
 
   const author = await prisma.author.create({
-    data: {
-      name: "PDFFlow",
-      slug: "editorial",
-      role: "Editor",
-      bio: "Publishes the guides on this site.",
-    },
+    data: require("./content/site-author.json"),
   });
 
   const iphone = await prisma.device.create({

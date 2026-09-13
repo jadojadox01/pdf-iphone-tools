@@ -31,7 +31,14 @@ export default async function GuideArticle({ guide, preview = false }) {
             description: guide.excerpt,
             datePublished: guide.publishedAt,
             dateModified: guide.updatedAt,
-            author: guide.author ? { "@type": "Organization", name: guide.author.name } : undefined,
+            author: guide.author
+              ? {
+                  "@type": "Person",
+                  name: guide.author.name,
+                  url: absoluteUrl(`/authors/${guide.author.slug}`),
+                  jobTitle: guide.author.role || undefined,
+                }
+              : undefined,
             mainEntityOfPage: absoluteUrl(`/guides/${guide.slug}`),
           }}
         />

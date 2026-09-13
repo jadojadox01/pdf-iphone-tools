@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { adminGuard } from "@/lib/admin-guard";
 import { buildGuideRecord, robotsForStatus, saveRevision, syncGuideRelations } from "@/lib/cms/guides";
+import { ensureSiteAuthor } from "@/lib/cms/site-author";
 import { getGuidePlanning, publishBlockReason } from "@/lib/cms/planning";
 
 function includeGuide() {
@@ -40,7 +41,9 @@ export async function PUT(request, { params }) {
   const existing = await prisma.guide.findUnique({ where: { id } });
   if (!existing || existing.deletedAt) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const body = await request.json().catch(() => ({}));
+  const author = await ensureSiteAuthor(prisma);
   const data = buildGuideRecord(body, existing);
+  if (!data.authorId) data.authorId = existing.authorId || author?.id || null;
   if (data.status === "published") {
     const blocked = publishBlockReason(
       { ...existing, ...body },

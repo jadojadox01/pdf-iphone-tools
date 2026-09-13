@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { adminGuard } from "@/lib/admin-guard";
 import { buildGuideRecord, saveRevision, syncGuideRelations } from "@/lib/cms/guides";
+import { ensureSiteAuthor } from "@/lib/cms/site-author";
 import { getGuidePlanning, publishBlockReason } from "@/lib/cms/planning";
 
 function includeGuide() {
@@ -61,7 +62,9 @@ export async function POST(request) {
   if (!String(body.title || "").trim()) {
     return NextResponse.json({ error: "Title is required." }, { status: 400 });
   }
+  const author = await ensureSiteAuthor(prisma);
   const data = buildGuideRecord(body);
+  if (!data.authorId && author?.id) data.authorId = author.id;
   if (data.status === "published") {
     const blocked = publishBlockReason(body, getGuidePlanning(body));
     if (blocked) return NextResponse.json({ error: blocked }, { status: 400 });

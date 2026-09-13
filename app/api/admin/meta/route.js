@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { adminGuard } from "@/lib/admin-guard";
 import { getAdminStats } from "@/lib/cms/guides";
+import { ensureSiteAuthor } from "@/lib/cms/site-author";
 import { prisma } from "@/lib/db";
 
 export async function GET() {
   const denied = await adminGuard();
   if (denied) return denied;
+  await ensureSiteAuthor(prisma);
   const [stats, authors, categories, guides, devices] = await Promise.all([
     getAdminStats(),
     prisma.author.findMany({ orderBy: { name: "asc" } }),

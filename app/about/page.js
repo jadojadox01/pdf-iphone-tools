@@ -1,5 +1,6 @@
 import { pageMetadata } from "@/lib/seo";
 import { CONTACT_EMAIL, CONTACT_WHATSAPP, CONTACT_WHATSAPP_URL, SITE_NAME } from "@/lib/site";
+import { SITE_AUTHOR, authorBioParagraphs } from "@/lib/cms/site-author";
 import Link from "next/link";
 
 export const metadata = pageMetadata({
@@ -9,6 +10,7 @@ export const metadata = pageMetadata({
 });
 
 export default function AboutPage() {
+  const bio = authorBioParagraphs(SITE_AUTHOR.bio);
   return (
     <div className="wrap prose" style={{ padding: "32px 0 64px" }}>
       <h1>About</h1>
@@ -18,9 +20,14 @@ export default function AboutPage() {
       <p>
         The site exists because those jobs are awkward on a phone, especially in Safari on iPhone. You should not need another app for conversion.
       </p>
+      <h2>Who runs {SITE_NAME}</h2>
+      {bio.map((paragraph) => (
+        <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+      ))}
       <p>
-        This website is run by the person you can reach at{" "}
-        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> or on WhatsApp at{" "}
+        Read more on the{" "}
+        <Link href={`/authors/${SITE_AUTHOR.slug}`}>{SITE_AUTHOR.name}</Link> author page, or reach{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> or WhatsApp at{" "}
         <a href={CONTACT_WHATSAPP_URL}>{CONTACT_WHATSAPP}</a>. There is no office address listed here.
       </p>
       <h2>What the tools do</h2>

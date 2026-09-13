@@ -3,6 +3,7 @@ import { BRAND, CONTACT_EMAIL } from "@/config/brand";
 import { getTools } from "@/lib/tools";
 import { toolPath } from "@/lib/paths";
 import { DEVICE_HUBS } from "@/lib/devices";
+import { SITE_AUTHOR } from "@/lib/cms/site-author";
 import CookieSettingsLink from "./CookieSettingsLink";
 
 export default function Footer({ publishedDeviceSlugs = [] }) {
@@ -25,7 +26,8 @@ export default function Footer({ publishedDeviceSlugs = [] }) {
             <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           </p>
           <p>
-            © {year} {BRAND.name}
+            © {year} {BRAND.name}. Founded and edited by{" "}
+            <Link href={`/authors/${SITE_AUTHOR.slug}`}>{SITE_AUTHOR.name}</Link>.
           </p>
         </div>
         <div>
@@ -51,6 +53,7 @@ export default function Footer({ publishedDeviceSlugs = [] }) {
         <div>
           <strong>Site</strong>
           <Link href="/guides">Guides</Link>
+          <Link href={`/authors/${SITE_AUTHOR.slug}`}>Author</Link>
           <Link href="/about">About</Link>
           <Link href="/contact">Contact</Link>
           <Link href="/sitemap">Sitemap</Link>

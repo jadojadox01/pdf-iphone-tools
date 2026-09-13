@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { adminGuard } from "@/lib/admin-guard";
+import { ensureSiteAuthor } from "@/lib/cms/site-author";
 import { slugify } from "@/lib/slug";
 
 export async function GET() {
   const denied = await adminGuard();
   if (denied) return denied;
+  await ensureSiteAuthor(prisma);
   const authors = await prisma.author.findMany({ orderBy: { name: "asc" } });
   return NextResponse.json({ authors });
 }
