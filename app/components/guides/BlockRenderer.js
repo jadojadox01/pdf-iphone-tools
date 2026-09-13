@@ -27,7 +27,7 @@ export default function BlockRenderer({ blocks, guide }) {
 
   const body = articleDoc ? (
     <>
-      <GuideBody doc={articleDoc} title={guide?.title} className="" />
+      <GuideBody doc={articleDoc} title={guide?.title} guide={guide} className="" />
       {rest.map((block, index) => (
             <Block key={block.id || `extra-${index}`} block={block} guide={guide} headings={headings} links={links} headingId={headingId} />
           ))}

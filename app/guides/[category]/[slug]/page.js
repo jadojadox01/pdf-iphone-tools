@@ -9,7 +9,6 @@ import { pageMetadata } from "@/lib/seo";
 import { estimateReadTime, formatDate } from "@/lib/slug";
 import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import { guideCover } from "@/lib/guides/cover";
-import { getGuideViews } from "@/lib/guide-views";
 import AdRegion from "../../../components/AdRegion";
 import GuideFeaturedImage from "../../../components/guides/GuideFeaturedImage";
 import { distinctDescription, isSameGuideText } from "@/lib/cms/article-display";
@@ -50,7 +49,6 @@ export default async function GuideArticlePage({ params }) {
   const faqs = extractFaqs(item.blocks);
   const steps = extractHowToSteps(item.blocks);
   const readMinutes = estimateReadTime(extractSearchText(item.blocks)) || item.readingTime || 1;
-  const views = await getGuideViews(guide.slug);
   const path = guide.canonicalUrl || guidePath(guide);
   const cover = guideCover(guide);
   const crumbs = [{ name: "Home", path: "/" }];
@@ -145,11 +143,9 @@ export default async function GuideArticlePage({ params }) {
             </div>
             <div className="guide-meta-tools">
               <GuideToolbar
-                slug={guide.slug}
                 title={guide.title}
                 url={absoluteUrl(path)}
                 readMinutes={readMinutes}
-                initialViews={views}
               />
             </div>
           </div>

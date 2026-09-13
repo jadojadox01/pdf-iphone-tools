@@ -2148,16 +2148,21 @@ body.word-writing {
 
 .word-canvas .tiptap ul,
 .word-canvas .tiptap ol {
-  margin: 0.4em 0 0.8em;
-  padding-left: 1.7em;
+  margin: 0.5em 0 0.9em;
+  padding: 10px 16px 10px 2rem;
+  border-radius: 12px;
 }
 
 .word-canvas .tiptap ul {
   list-style: disc;
+  background: #ecfdf5;
+  border-left: 4px solid var(--accent);
 }
 
 .word-canvas .tiptap ol {
   list-style: decimal;
+  background: var(--coral-soft);
+  border-left: 4px solid var(--coral);
 }
 
 .word-canvas .tiptap li {
@@ -2327,6 +2332,33 @@ body.word-writing {
   min-height: 320px;
   padding: 16px;
   outline: none;
+}
+
+.editor .tiptap a[href^="/"],
+.word-canvas .tiptap a[href^="/"] {
+  color: var(--coral);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.editor .tiptap ul,
+.editor .tiptap ol {
+  margin: 0.5em 0 0.9em;
+  padding: 10px 16px 10px 2rem;
+  border-radius: 12px;
+}
+
+.editor .tiptap ul {
+  list-style: disc;
+  background: #ecfdf5;
+  border-left: 4px solid var(--accent);
+}
+
+.editor .tiptap ol {
+  list-style: decimal;
+  background: var(--coral-soft);
+  border-left: 4px solid var(--coral);
 }
 
 .google-preview {
@@ -3058,20 +3090,80 @@ a.guide-extlink {
 
 .guide-page .article-body ul,
 .guide-page .article-body ol {
-  margin: 0 0 1.4em;
-  padding-left: 1.25em;
+  margin: 0 0 1.5em;
+  padding: 14px 18px 14px 2.1rem;
+  border-radius: 14px;
 }
 
 .guide-page .article-body ul {
   list-style: disc;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-left: 4px solid var(--accent);
 }
 
 .guide-page .article-body ol {
   list-style: decimal;
+  background: var(--coral-soft);
+  border: 1px solid #fdba74;
+  border-left: 4px solid var(--coral);
+}
+
+.guide-page .article-body ul > li::marker {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.guide-page .article-body ol > li::marker {
+  color: var(--coral);
+  font-weight: 800;
 }
 
 .guide-page .article-body li + li {
-  margin-top: 0.35em;
+  margin-top: 0.45em;
+}
+
+.guide-page .article-body .checklist {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid #2563eb;
+  padding: 10px 16px 10px 12px;
+  list-style: none;
+}
+
+.guide-page .article-body .steps {
+  margin: 0 0 1.5em;
+}
+
+.guide-page .article-body .step {
+  background: #fff;
+}
+
+.guide-page .article-body .step:nth-child(3n + 1) {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.guide-page .article-body .step:nth-child(3n + 2) {
+  background: var(--coral-soft);
+  border-color: #fdba74;
+}
+
+.guide-page .article-body .step:nth-child(3n + 3) {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.guide-page .article-body .step:nth-child(3n + 1) .step-num {
+  background: var(--accent);
+}
+
+.guide-page .article-body .step:nth-child(3n + 2) .step-num {
+  background: var(--coral);
+}
+
+.guide-page .article-body .step:nth-child(3n + 3) .step-num {
+  background: #2563eb;
 }
 
 .guide-page .article-body h2 {

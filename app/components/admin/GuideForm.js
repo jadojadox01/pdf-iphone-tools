@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import MediaPicker from "./MediaPicker";
 import TiptapEditor from "./TiptapEditor";
@@ -59,6 +59,9 @@ export default function GuideForm({ guideId }) {
   const [revisions, setRevisions] = useState([]);
   const [slugLocked, setSlugLocked] = useState(false);
   const [topicId, setTopicId] = useState("");
+  const [docReady, setDocReady] = useState(!guideId);
+  const [savedNote, setSavedNote] = useState("");
+  const editorRef = useRef(null);
 
   useEffect(() => {
     fetch("/api/admin/meta")
@@ -87,6 +90,7 @@ export default function GuideForm({ guideId }) {
           planning: parsePlanning(data.guide.planning || planningFromBlocks(blocks)),
         });
         setDoc(docFromGuideBlocks(blocks));
+        setDocReady(true);
         setSlugLocked(Boolean(data.guide.slug) && data.guide.slug !== slugify(data.guide.title || ""));
         setRevisions(data.guide.revisions || []);
       });
@@ -192,13 +196,31 @@ export default function GuideForm({ guideId }) {
     }
     setBusy(true);
     setError("");
+    setSavedNote("");
+    const liveDoc = editorRef.current?.getJSON?.() || doc;
     const payload = {
-      ...guide,
-      planning: parsePlanning(guide.planning),
-      doc,
-      status: status || guide.status,
-      tags: Array.isArray(guide.tags) ? guide.tags : String(guide.tags).split(",").map((item) => item.trim()).filter(Boolean),
+      title: guide.title,
+      slug: guide.slug,
+      excerpt: guide.excerpt,
+      template: guide.template,
+      featured: guide.featured,
       scheduledAt: guide.scheduledAt || null,
+      seoTitle: guide.seoTitle,
+      seoDescription: guide.seoDescription,
+      canonicalUrl: guide.canonicalUrl,
+      robots: guide.robots,
+      focusTopic: guide.focusTopic,
+      featuredImageId: guide.featuredImageId || null,
+      ogImageId: guide.ogImageId || null,
+      authorId: guide.authorId || null,
+      categoryId: guide.categoryId || null,
+      deviceId: guide.deviceId || null,
+      tags: Array.isArray(guide.tags) ? guide.tags : String(guide.tags).split(",").map((item) => item.trim()).filter(Boolean),
+      relatedTools: guide.relatedTools || [],
+      relatedGuideIds: guide.relatedGuideIds || [],
+      planning: parsePlanning(guide.planning),
+      doc: liveDoc,
+      status: status || guide.status,
     };
     if (status === "published" && !guide.publishedAt) payload.publishedAt = new Date().toISOString();
     if (status === "published" && (!guide.robots || guide.robots === "noindex,follow")) {
@@ -219,8 +241,8 @@ export default function GuideForm({ guideId }) {
       router.replace(`/admin/guides/${data.guide.id}`);
       return;
     }
-    router.push("/admin/guides");
-    router.refresh();
+    setDoc(liveDoc);
+    setSavedNote("Saved. Internal links and formatting are kept in the article.");
   }
 
   const seoTitle = guide.seoTitle || guide.title || "Untitled guide";
@@ -445,7 +467,13 @@ export default function GuideForm({ guideId }) {
           Help the reader finish the task with PDFFlow. Typical tool-guide sections: {TOOL_GUIDE_SECTIONS.map((item) => item.heading).join("; ")}.
           Skip any section that does not apply. Do not write a long generic SEO article. Insert can add Tip, Warning, Note, table, example, FAQ, sources, and a tool card.
         </p>
-        <TiptapEditor value={doc} onChange={updateDoc} />
+        <TiptapEditor
+          value={doc}
+          onChange={updateDoc}
+          contentKey={guideId || "new"}
+          ready={docReady}
+          editorRef={editorRef}
+        />
       </div>
 
       <details className="composer-advanced" open>
@@ -621,6 +649,7 @@ export default function GuideForm({ guideId }) {
       </details>
 
       {error && <div className="alert alert-error">{error}</div>}
+      {savedNote ? <div className="alert alert-info">{savedNote}</div> : null}
       <div className="sticky-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => save("draft")}>
           Save draft

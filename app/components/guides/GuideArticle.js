@@ -7,13 +7,11 @@ import JsonLd, { breadcrumbJsonLd } from "../JsonLd";
 import { absoluteUrl } from "@/lib/site";
 import GuideToc from "./GuideToc";
 import GuideToolbar from "./GuideToolbar";
-import { getGuideViews } from "@/lib/guide-views";
 
 export default async function GuideArticle({ guide, preview = false }) {
   const toc = extractToc(guide.contentJson);
   const faqs = faqsFromDoc(guide.contentJson);
   const tools = (guide.relatedTools || []).map(getTool).filter(Boolean);
-  const views = preview ? 0 : await getGuideViews(guide.slug);
   const crumbs = [
     { name: "Home", path: "/" },
     { name: "Guides", path: "/guides" },
@@ -66,11 +64,9 @@ export default async function GuideArticle({ guide, preview = false }) {
         <p className="lede">{guide.excerpt}</p>
         {!preview && (
           <GuideToolbar
-            slug={guide.slug}
             title={guide.title}
             url={absoluteUrl(`/guides/${guide.slug}`)}
             readMinutes={guide.readingTime || 1}
-            initialViews={views}
           />
         )}
       </div>

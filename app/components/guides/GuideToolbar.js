@@ -1,55 +1,8 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { Icon } from "../Icons";
 
-const inflight = new Map();
-
-export default function GuideToolbar({ slug, title, url, readMinutes, initialViews = 0 }) {
-  const [views, setViews] = useState(initialViews);
+export default function GuideToolbar({ title, url, readMinutes }) {
   const shareUrl = encodeURIComponent(url);
   const shareText = encodeURIComponent(title);
-
-  useEffect(() => {
-    if (!slug) return undefined;
-    let cancelled = false;
-    const seenKey = `pdfflow-gv-${slug}`;
-    let already = false;
-    try {
-      already = window.localStorage.getItem(seenKey) === "1";
-    } catch {
-      already = false;
-    }
-    const pending =
-      inflight.get(slug) ||
-      (already
-        ? fetch(`/api/guides/view?slug=${encodeURIComponent(slug)}`).then((response) =>
-            response.ok ? response.json() : null,
-          )
-        : fetch("/api/guides/view", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ slug }),
-          }).then((response) => {
-            if (!response.ok) return null;
-            try {
-              window.localStorage.setItem(seenKey, "1");
-            } catch {
-              /* private mode */
-            }
-            return response.json();
-          })
-      ).finally(() => inflight.delete(slug));
-    inflight.set(slug, pending);
-    pending
-      .then((data) => {
-        if (!cancelled && data && Number.isFinite(Number(data.views))) setViews(Number(data.views));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [slug]);
 
   return (
     <>
@@ -86,10 +39,6 @@ export default function GuideToolbar({ slug, title, url, readMinutes, initialVie
         <span>
           <Icon name="clock" size={16} />
           {readMinutes} min read
-        </span>
-        <span>
-          <Icon name="eye" size={16} />
-          {views === 1 ? "1 person viewed" : `${Number(views).toLocaleString()} people viewed`}
         </span>
       </p>
     </>

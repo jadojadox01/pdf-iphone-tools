@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Link } from "@tiptap/extension-link";
@@ -75,12 +75,13 @@ const FONT_FAMILIES = [
 
 const FONT_SIZES = ["12px", "14px", "16px", "18px", "24px", "32px"];
 
-export default function TiptapEditor({ value, onChange }) {
+export default function TiptapEditor({ value, onChange, contentKey = "", ready = true, editorRef }) {
   const tools = getTools();
   const [tab, setTab] = useState("home");
   const [full, setFull] = useState(false);
   const [ribbonOpen, setRibbonOpen] = useState(true);
   const [, setTick] = useState(0);
+  const seededFor = useRef("");
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -96,7 +97,11 @@ export default function TiptapEditor({ value, onChange }) {
       HighlightMark,
       BlockLayout,
       TextAlign.configure({ types: ["heading", "paragraph", "image"] }),
-      Link.configure({ openOnClick: false, autolink: true }),
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        HTMLAttributes: { rel: "noopener noreferrer" },
+      }),
       CaptionedImage.configure({
         inline: false,
         allowBase64: false,
@@ -129,11 +134,19 @@ export default function TiptapEditor({ value, onChange }) {
   });
 
   useEffect(() => {
-    if (!editor || !value) return;
-    const current = JSON.stringify(editor.getJSON());
-    const next = JSON.stringify(value);
-    if (current !== next) editor.commands.setContent(value, { emitUpdate: false });
-  }, [editor, value]);
+    if (!editorRef) return undefined;
+    editorRef.current = editor;
+    return () => {
+      if (editorRef.current === editor) editorRef.current = null;
+    };
+  }, [editor, editorRef]);
+
+  useEffect(() => {
+    if (!editor || !ready) return;
+    if (seededFor.current === contentKey) return;
+    editor.commands.setContent(value || emptyDoc(), { emitUpdate: false });
+    seededFor.current = contentKey;
+  }, [editor, ready, contentKey, value]);
 
   useEffect(() => {
     if (!editor) return undefined;
