@@ -12,6 +12,7 @@ import { guideCover } from "@/lib/guides/cover";
 import { getGuideViews } from "@/lib/guide-views";
 import AdRegion from "../../../components/AdRegion";
 import GuideFeaturedImage from "../../../components/guides/GuideFeaturedImage";
+import { distinctDescription, isSameGuideText } from "@/lib/cms/article-display";
 import { mediaSrcFromGuide } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }) {
   const robotsNoIndex = String(guide.robots || "").includes("noindex");
   return pageMetadata({
     title: guide.seoTitle || guide.title,
-    description: guide.seoDescription || guide.excerpt,
+    description: distinctDescription(guide.seoDescription, guide.excerpt, guide.title),
     path: guide.canonicalUrl || `/guides/${guide.category?.slug || "how-to"}/${guide.slug}`,
     noIndex: robotsNoIndex,
     image: ogImage,
@@ -66,7 +67,7 @@ export default async function GuideArticlePage({ params }) {
           "@context": "https://schema.org",
           "@type": "Article",
           headline: guide.title,
-          description: guide.excerpt,
+          description: distinctDescription(guide.seoDescription, guide.excerpt, guide.title),
           datePublished: guide.publishedAt,
           dateModified: guide.updatedAt,
           image: absoluteUrl(cover),
@@ -83,7 +84,7 @@ export default async function GuideArticlePage({ params }) {
             "@context": "https://schema.org",
             "@type": "HowTo",
             name: guide.title,
-            description: guide.excerpt,
+            description: distinctDescription(guide.seoDescription, guide.excerpt, guide.title),
             step: steps.map((step, index) => ({
               "@type": "HowToStep",
               position: index + 1,
@@ -128,25 +129,31 @@ export default async function GuideArticlePage({ params }) {
 
         <GuideFeaturedImage guide={guide} title={guide.title} />
 
-        {guide.category && <p className="guide-kicker">{guide.category.name}</p>}
-        <div className="guide-title-row">
+        <header className="guide-header">
+          {guide.category && <p className="guide-kicker">{guide.category.name}</p>}
           <h1>{guide.title}</h1>
-          <GuideToolbar
-            slug={guide.slug}
-            title={guide.title}
-            url={absoluteUrl(path)}
-            readMinutes={readMinutes}
-            initialViews={views}
-          />
-        </div>
-        {guide.excerpt ? <p className="lede">{guide.excerpt}</p> : null}
-        {guide.author ? (
-          <p className="guide-byline">
-            By{" "}
-            <Link href={`/authors/${guide.author.slug}`}>{guide.author.name}</Link>
-            {guide.author.role ? ` · ${guide.author.role}` : ""}
-          </p>
-        ) : null}
+          {guide.excerpt && !isSameGuideText(guide.excerpt, guide.title) ? <p className="lede">{guide.excerpt}</p> : null}
+          <div className="guide-meta">
+            <div className="guide-meta-copy">
+              {guide.author ? (
+                <p className="guide-byline">
+                  By{" "}
+                  <Link href={`/authors/${guide.author.slug}`}>{guide.author.name}</Link>
+                  {guide.author.role ? ` · ${guide.author.role}` : ""}
+                </p>
+              ) : null}
+            </div>
+            <div className="guide-meta-tools">
+              <GuideToolbar
+                slug={guide.slug}
+                title={guide.title}
+                url={absoluteUrl(path)}
+                readMinutes={readMinutes}
+                initialViews={views}
+              />
+            </div>
+          </div>
+        </header>
 
         <BlockRenderer blocks={item.blocks} guide={item} />
         {item.planning?.sources?.length && !item.blocks.some((block) => block.type === "sources") ? (

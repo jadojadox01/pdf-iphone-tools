@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import MediaPicker from "./MediaPicker";
 import TiptapEditor from "./TiptapEditor";
 import { parseBlocks, planningFromBlocks } from "@/lib/cms/blocks";
-import { blocksToDoc, docToBlocks } from "@/lib/cms/doc-blocks";
+import { docFromGuideBlocks } from "@/lib/cms/doc-blocks";
 import { emptyDoc } from "@/lib/cms/tiptap";
 import { assessGuideQuality, PUBLISH_VALUE_QUESTION } from "@/lib/cms/quality";
 import {
@@ -86,7 +86,7 @@ export default function GuideForm({ guideId }) {
           relatedGuideIds: data.guide.relatedGuideIds || [],
           planning: parsePlanning(data.guide.planning || planningFromBlocks(blocks)),
         });
-        setDoc(blocksToDoc(blocks));
+        setDoc(docFromGuideBlocks(blocks));
         setSlugLocked(Boolean(data.guide.slug) && data.guide.slug !== slugify(data.guide.title || ""));
         setRevisions(data.guide.revisions || []);
       });
@@ -126,7 +126,6 @@ export default function GuideForm({ guideId }) {
 
   function updateDoc(next) {
     setDoc(next);
-    update("blocks", docToBlocks(next));
   }
 
   function applyTopic(id) {
@@ -157,7 +156,23 @@ export default function GuideForm({ guideId }) {
     }));
   }
 
-  const quality = useMemo(() => assessGuideQuality({ ...guide, planning: parsePlanning(guide.planning) }, meta), [guide, meta]);
+  const quality = useMemo(
+    () =>
+      assessGuideQuality(
+        {
+          ...guide,
+          planning: parsePlanning(guide.planning),
+          blocks: [
+            { id: "article", type: "articleDoc", data: { doc } },
+            ...(guide.blocks || []).filter((block) =>
+              ["planning", "relatedTools", "relatedGuides", "toc"].includes(block.type),
+            ),
+          ],
+        },
+        meta,
+      ),
+    [guide, meta, doc],
+  );
   const warnings = quality.warnings;
   const planning = parsePlanning(guide.planning);
   const blocked = publishBlockReason(guide, planning, { alreadyPublished: guide.status === "published" });
@@ -180,8 +195,7 @@ export default function GuideForm({ guideId }) {
     const payload = {
       ...guide,
       planning: parsePlanning(guide.planning),
-      blocks: docToBlocks(doc),
-      blocksJson: docToBlocks(doc),
+      doc,
       status: status || guide.status,
       tags: Array.isArray(guide.tags) ? guide.tags : String(guide.tags).split(",").map((item) => item.trim()).filter(Boolean),
       scheduledAt: guide.scheduledAt || null,

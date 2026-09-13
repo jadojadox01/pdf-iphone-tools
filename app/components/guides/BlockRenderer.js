@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { extractFaqs, extractHeadings, parseBlocks, slugFromHeading, textToParagraphs } from "@/lib/cms/blocks";
+import { extractFaqs, extractHeadings, getArticleDoc, parseBlocks, slugFromHeading, textToParagraphs } from "@/lib/cms/blocks";
+import { tocItemsFromHeadings, stripLeadingTitle, isSameGuideText } from "@/lib/cms/article-display";
+import { GuideBody } from "@/lib/cms/render";
 import { buildGuideLinks } from "@/lib/cms/linkify";
 import { getTool } from "@/lib/tools";
 import { toolPath } from "@/lib/paths";
@@ -7,49 +9,50 @@ import GuideToc from "./GuideToc";
 import LinkedText from "./LinkedText";
 
 export default function BlockRenderer({ blocks, guide }) {
-  const list = parseBlocks(blocks);
+  const list = parseBlocks(blocks).filter((block) => block.type !== "planning" && block.type !== "toc");
+  const articleDoc = getArticleDoc(list);
   const headings = extractHeadings(list);
+  const pendingHeadings = [...headings];
   const links = buildGuideLinks(guide);
-  const tocIndex = list.findIndex((block) => block.type === "toc");
-  const tocBlock = tocIndex >= 0 ? list[tocIndex] : null;
-  const intro = tocIndex >= 0 ? list.slice(0, tocIndex) : [];
-  const body = tocIndex >= 0 ? list.slice(tocIndex + 1) : list;
-  const tocHeadings = headings.filter((item) => item.level === 2);
-  const tocItems = tocHeadings.length >= 3 ? tocHeadings : headings;
-  const showToc = Boolean(tocBlock) && tocItems.length >= 3;
+  const tocItems = tocItemsFromHeadings(headings, guide?.title);
+  const showToc = tocItems.length >= 3;
+  const rest = list.filter((block) => block.type !== "articleDoc");
+
+  function headingId(text) {
+    const index = pendingHeadings.findIndex((item) => item.text === text);
+    if (index === -1) return slugFromHeading(text);
+    const [item] = pendingHeadings.splice(index, 1);
+    return item.id;
+  }
+
+  const body = articleDoc ? (
+    <>
+      <GuideBody doc={articleDoc} title={guide?.title} className="" />
+      {rest.map((block, index) => (
+            <Block key={block.id || `extra-${index}`} block={block} guide={guide} headings={headings} links={links} headingId={headingId} />
+          ))}
+        </>
+      ) : (
+        rest.map((block, index) => (
+          <Block key={block.id || `body-${index}`} block={block} guide={guide} headings={headings} links={links} headingId={headingId} />
+    ))
+  );
+
+  if (!showToc) {
+    return <div className="article-body">{body}</div>;
+  }
 
   return (
-    <>
-      {intro.length > 0 ? (
-        <div className="article-body">
-          {intro.map((block, index) => (
-            <Block key={block.id || `intro-${index}`} block={block} guide={guide} headings={headings} links={links} />
-          ))}
-        </div>
-      ) : null}
-      {showToc ? (
-        <div className="guide-layout">
-          <GuideToc title={tocBlock.data?.title} items={tocItems} />
-          <div className="article-body">
-            {body.map((block, index) => (
-              <Block key={block.id || `body-${index}`} block={block} guide={guide} headings={headings} links={links} />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="article-body">
-          {body.map((block, index) => (
-            <Block key={block.id || `body-${index}`} block={block} guide={guide} headings={headings} links={links} />
-          ))}
-        </div>
-      )}
-    </>
+    <div className="guide-layout">
+      <GuideToc title="On this page" items={tocItems} />
+      <div className="article-body">{body}</div>
+    </div>
   );
 }
 
 export { extractFaqs, extractHeadings };
 
-function Block({ block, guide, headings, links }) {
+function Block({ block, guide, headings, links, headingId }) {
   const data = block.data || {};
   switch (block.type) {
     case "planning":
@@ -67,7 +70,8 @@ function Block({ block, guide, headings, links }) {
     case "heading": {
       const level = Math.min(3, Math.max(2, Number(data.level) || 2));
       const Tag = `h${level}`;
-      return <Tag id={slugFromHeading(data.text)}>{data.text}</Tag>;
+      if (!data.text || isSameGuideText(data.text, guide?.title)) return null;
+      return <Tag id={headingId ? headingId(data.text) : slugFromHeading(data.text)}>{data.text}</Tag>;
     }
     case "image":
       return data.url ? (
@@ -91,13 +95,24 @@ function Block({ block, guide, headings, links }) {
           <iframe src={safeVideo(data.url)} title={data.title || "Video"} allowFullScreen />
         </div>
       ) : null;
-    case "quote":
+    case "quote": {
+      const text = stripLeadingTitle(data.text, guide?.title);
+      if (!text) return null;
+      const stripped = text !== String(data.text || "").trim();
+      if (stripped) {
+        return (
+          <div className="guide-standfirst">
+            <RichText text={text} links={links} />
+          </div>
+        );
+      }
       return (
         <blockquote>
-          <RichText text={data.text} links={links} />
+          <RichText text={text} links={links} />
           {data.cite ? <cite>{data.cite}</cite> : null}
         </blockquote>
       );
+    }
     case "list":
       return (
         <ul>
@@ -399,6 +414,8 @@ function Block({ block, guide, headings, links }) {
         </section>
       );
     }
+    case "articleDoc":
+      return null;
     case "toc":
       return null;
     case "divider":
