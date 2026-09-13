@@ -82,7 +82,7 @@ export default function AdminMediaPage() {
         {media.map((item) => (
           <article className="media-card" key={item.id}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={item.url} alt={item.alt || item.filename} />
+                <img src={item.url || `/media/${item.id}`} alt={item.alt || item.filename} />
             <p className="help">{item.filename}</p>
             <p className="help">
               {item.width || "?"}×{item.height || "?"} · {Math.round((item.size || 0) / 1024)} KB
