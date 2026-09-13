@@ -42,7 +42,11 @@ export async function PUT(request, { params }) {
   const body = await request.json().catch(() => ({}));
   const data = buildGuideRecord(body, existing);
   if (data.status === "published") {
-    const blocked = publishBlockReason({ ...existing, ...body }, getGuidePlanning(body.planning ? body : { ...existing, ...body }));
+    const blocked = publishBlockReason(
+      { ...existing, ...body },
+      getGuidePlanning(body.planning ? body : { ...existing, ...body }),
+      { alreadyPublished: existing.status === "published" },
+    );
     if (blocked) return NextResponse.json({ error: blocked }, { status: 400 });
   }
   try {
@@ -126,6 +130,21 @@ export async function PATCH(request, { params }) {
       },
     });
     return NextResponse.json({ guide });
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, "featuredImageId") || Object.prototype.hasOwnProperty.call(body, "ogImageId")) {
+    const imageData = {};
+    if (Object.prototype.hasOwnProperty.call(body, "featuredImageId")) {
+      imageData.featuredImageId = String(body.featuredImageId || "").trim() || null;
+    }
+    if (Object.prototype.hasOwnProperty.call(body, "ogImageId")) {
+      imageData.ogImageId = String(body.ogImageId || "").trim() || null;
+    }
+    if (!body.action && !body.status) {
+      await prisma.guide.update({ where: { id }, data: imageData });
+      const saved = await prisma.guide.findUnique({ where: { id }, include: includeGuide() });
+      return NextResponse.json({ guide: saved });
+    }
   }
 
   const status = body.status;

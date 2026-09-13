@@ -17,7 +17,8 @@ import {
   parsePlanning,
   publishBlockReason,
 } from "@/lib/cms/planning";
-import { TOPIC_ROADMAP } from "@/lib/cms/topics";
+import { CONTENT_PIPELINE, OWNED_DEVICES, TOOL_GUIDE_SECTIONS } from "@/lib/cms/content-strategy";
+import { getCanonicalTopic, getFoldedResearch, TOPIC_ROADMAP } from "@/lib/cms/topics";
 import { getTools } from "@/lib/tools";
 import { SITE_URL } from "@/lib/site";
 import { slugify } from "@/lib/slug";
@@ -57,6 +58,7 @@ export default function GuideForm({ guideId }) {
   const [busy, setBusy] = useState(false);
   const [revisions, setRevisions] = useState([]);
   const [slugLocked, setSlugLocked] = useState(false);
+  const [topicId, setTopicId] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/meta")
@@ -92,6 +94,13 @@ export default function GuideForm({ guideId }) {
 
   function update(key, value) {
     setGuide((current) => ({ ...current, [key]: value }));
+    if (guideId && (key === "featuredImageId" || key === "ogImageId")) {
+      fetch(`/api/admin/guides/${guideId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: value || null }),
+      }).catch(() => undefined);
+    }
   }
 
   function updatePlanning(key, value) {
@@ -121,11 +130,14 @@ export default function GuideForm({ guideId }) {
   }
 
   function applyTopic(id) {
-    const topic = TOPIC_ROADMAP.find((item) => item.id === id);
+    const topic = getCanonicalTopic(id);
     if (!topic) return;
+    setTopicId(id);
+    if (!slugLocked && !guide.slug) setSlugLocked(true);
     setGuide((current) => ({
       ...current,
       title: current.title || topic.title,
+      slug: slugLocked || current.slug ? current.slug : slugify(topic.suggestedSlug || topic.title),
       seoTitle: current.seoTitle || topic.title,
       relatedTools: topic.relatedTools?.length ? topic.relatedTools : current.relatedTools,
       tags: topic.supportingKeywords || current.tags,
@@ -134,10 +146,13 @@ export default function GuideForm({ guideId }) {
         primaryKeyword: topic.primaryKeyword,
         supportingKeywords: topic.supportingKeywords || [],
         searchIntent: topic.searchIntent,
-        deviceIntent: topic.deviceIntent,
+        deviceIntent: topic.deviceIntent || "any",
         toolDependency: topic.toolDependency,
         priority: topic.priority,
         relatedSearches: topic.relatedSearches || [],
+        internalLinkNotes:
+          current.planning?.internalLinkNotes ||
+          `Main CTA: ${topic.toolDependency}. Cover related searches in this page. Do not create extra URLs for keyword variants.`,
       },
     }));
   }
@@ -145,7 +160,7 @@ export default function GuideForm({ guideId }) {
   const quality = useMemo(() => assessGuideQuality({ ...guide, planning: parsePlanning(guide.planning) }, meta), [guide, meta]);
   const warnings = quality.warnings;
   const planning = parsePlanning(guide.planning);
-  const blocked = publishBlockReason(guide, planning);
+  const blocked = publishBlockReason(guide, planning, { alreadyPublished: guide.status === "published" });
 
   async function save(status) {
     if (status === "published") {
@@ -199,12 +214,18 @@ export default function GuideForm({ guideId }) {
   const categorySlug = meta.categories.find((item) => item.id === guide.categoryId)?.slug || "how-to";
   const url = `${SITE_URL}/guides/${categorySlug}/${guide.slug || "your-slug"}`;
   const otherGuides = (meta.guides || []).filter((item) => item.id !== guideId);
+  const selectedTopic = getCanonicalTopic(topicId);
+  const foldedResearch = topicId ? getFoldedResearch(topicId) : [];
 
   return (
     <div className="guide-composer">
+      <div className="alert alert-info">
+        <strong>Content pipeline:</strong> {CONTENT_PIPELINE.join(" → ")}.
+        Test on devices you own ({OWNED_DEVICES.join(", ")}). Do not invent iPhone tests. Keywords are topics inside one useful guide, not extra URLs.
+      </div>
       <label className="field">
         Title
-        <input value={guide.title} onChange={(event) => updateTitle(event.target.value)} placeholder="How to convert a picture to PDF on iPhone" />
+        <input value={guide.title} onChange={(event) => updateTitle(event.target.value)} placeholder="How to Convert Images to PDF with PDFFlow" />
       </label>
 
       <div className="composer-meta-grid">
@@ -216,16 +237,16 @@ export default function GuideForm({ guideId }) {
           <p className="help">{slugLocked ? "You edited this slug." : "Filled from the title."}</p>
         </div>
         <label className="field">
-          Load planning from the topic roadmap
-          <select defaultValue="" onChange={(event) => applyTopic(event.target.value)}>
-            <option value="">Choose a planned topic…</option>
+          Load a tool-centered guide (not a keyword URL)
+          <select value={topicId} onChange={(event) => applyTopic(event.target.value)}>
+            <option value="">Choose a planned tool guide…</option>
             {TOPIC_ROADMAP.map((topic) => (
               <option key={topic.id} value={topic.id}>
                 {topic.priority} · {topic.title}
               </option>
             ))}
           </select>
-          <span className="help">Fills keywords and tool. It does not write the article.</span>
+          <span className="help">Fills title, keywords, and the live tool. It does not write the article. Old iPhone/Android/Windows keyword rows stay in research; they are not extra pages.</span>
         </label>
       </div>
 
@@ -235,7 +256,7 @@ export default function GuideForm({ guideId }) {
           <input
             value={planning.primaryKeyword}
             onChange={(event) => updatePlanning("primaryKeyword", event.target.value)}
-            placeholder="convert picture to PDF on iPhone"
+            placeholder="convert images to PDF"
           />
         </label>
         <label className="field">
@@ -248,7 +269,7 @@ export default function GuideForm({ guideId }) {
                 event.target.value.split(",").map((item) => item.trim()).filter(Boolean),
               )
             }
-            placeholder="photo to PDF iPhone, image to PDF iPhone"
+            placeholder="JPG to PDF, PNG to PDF, photo to PDF"
           />
         </label>
       </div>
@@ -316,9 +337,35 @@ export default function GuideForm({ guideId }) {
           rows={2}
           value={planning.internalLinkNotes || ""}
           onChange={(event) => updatePlanning("internalLinkNotes", event.target.value)}
-          placeholder="Link the Image to PDF tool once. Related: merge, HEIC to JPG. Device hub: /iphone."
+          placeholder="Link the live tool once. Cover JPG/PNG/photo as sections in this page, not extra URLs."
         />
       </label>
+
+      {selectedTopic ? (
+        <div className="alert alert-info">
+          <p>
+            <strong>Cover inside this guide — do not create extra URLs.</strong> Use these as headings, FAQs, examples, or troubleshooting. Do not keyword-stuff.
+          </p>
+          <p className="help" style={{ marginTop: 8 }}>
+            {(selectedTopic.coverSections || []).length
+              ? `Useful extra sections: ${selectedTopic.coverSections.join("; ")}.`
+              : null}{" "}
+            Suggested slug: {selectedTopic.suggestedSlug}
+          </p>
+          {foldedResearch.length ? (
+            <ul className="help" style={{ marginTop: 8 }}>
+              {foldedResearch.map((row) => (
+                <li key={row.id}>
+                  {row.primaryKeyword}
+                  {row.supportingKeywords?.length ? ` · ${row.supportingKeywords.join(", ")}` : ""}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="help">No folded keyword rows for this tool yet.</p>
+          )}
+        </div>
+      ) : null}
 
       <label className="field">
         Short introduction (shown under the title)
@@ -376,12 +423,13 @@ export default function GuideForm({ guideId }) {
       </div>
 
       <MediaPicker label="Featured image" value={guide.featuredImageId} onChange={(value) => update("featuredImageId", value)} />
-      <p className="help">Use a real screenshot or a clearly designed diagram. Do not mock an iPhone interface.</p>
+      <p className="help">Use a real screenshot from a device you own, or a clearly designed diagram. Do not mock an iPhone interface or fabricate device tests.</p>
 
       <div className="field">
         <span>Article</span>
         <p className="help">
-          Write what this problem needs. Do not use the same outline on every guide. Insert can add Tip, Warning, Note, table, diagram, example, FAQ, sources, and a tool card.
+          Help the reader finish the task with PDFFlow. Typical tool-guide sections: {TOOL_GUIDE_SECTIONS.map((item) => item.heading).join("; ")}.
+          Skip any section that does not apply. Do not write a long generic SEO article. Insert can add Tip, Warning, Note, table, example, FAQ, sources, and a tool card.
         </p>
         <TiptapEditor value={doc} onChange={updateDoc} />
       </div>

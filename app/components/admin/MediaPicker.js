@@ -47,7 +47,7 @@ export default function MediaPicker({ value, onChange, label = "Image" }) {
   return (
     <div className="field">
       <span>{label}</span>
-      <p className="help">This picture appears at the top of the guide, on guide cards, and in link previews.</p>
+      <p className="help">This picture appears at the top of the guide, on guide cards, and in link previews. Uploading or choosing an image saves it on this guide immediately.</p>
       {value && previewSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={previewSrc} alt={selected?.alt || "Featured image preview"} className="media-thumb" />

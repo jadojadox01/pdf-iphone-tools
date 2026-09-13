@@ -1,7 +1,7 @@
 import { mediaAltFromGuide, mediaSrcFromGuide } from "@/lib/media";
 
 export default function GuideFeaturedImage({ guide, title }) {
-  const src = mediaSrcFromGuide(guide);
+  const src = mediaSrcFromGuide(guide) || (guide?.featuredImageId ? `/media/${guide.featuredImageId}` : "");
   if (!src) return null;
   const alt = mediaAltFromGuide(guide, title || guide?.title || "");
   const caption = guide?.featuredImage?.caption || "";
