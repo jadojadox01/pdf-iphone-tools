@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import FileUploader from "./FileUploader";
 import SignatureWorkspace from "./SignatureWorkspace";
+import ToolProgress from "./ToolProgress";
+import ToolResult from "./ToolResult";
 import { takePendingFiles } from "@/lib/pending-files";
 import { runTool } from "@/lib/pdf/run";
 import { downloadBlob, revokeUrl } from "@/lib/pdf/download";
-import { formatBytes } from "@/lib/site";
 
 const defaultOptions = {
   quality: "recommended",
@@ -24,6 +25,7 @@ export default function ToolWorkspace({ tool }) {
   const [files, setFiles] = useState([]);
   const [options, setOptions] = useState(defaultOptions);
   const [status, setStatus] = useState("");
+  const [percent, setPercent] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -48,8 +50,14 @@ export default function ToolWorkspace({ tool }) {
     setResult(null);
     setError(null);
     setStatus("");
+    setPercent(0);
     setBusy(false);
     setOptions(defaultOptions);
+  }
+
+  function onProgress(message, meta = {}) {
+    if (message) setStatus(message);
+    if (Number.isFinite(meta.percent)) setPercent(meta.percent);
   }
 
   async function processFiles() {
@@ -57,9 +65,11 @@ export default function ToolWorkspace({ tool }) {
     setBusy(true);
     setError(null);
     setResult(null);
+    setPercent(3);
     setStatus("Starting…");
     try {
-      const output = await runTool(tool.slug, files, options, setStatus);
+      const output = await runTool(tool.slug, files, options, onProgress);
+      setPercent(100);
       const url = URL.createObjectURL(output.blob);
       setResult({ ...output, url });
       setStatus("");
@@ -79,105 +89,109 @@ export default function ToolWorkspace({ tool }) {
   if (tool.slug === "sign-pdf") {
     return (
       <div className="workspace">
-        {!files.length || result ? (
-          <>
-            <FileUploader files={files} onFiles={setFiles} onError={setError} />
-            {result && (
-              <ResultPanel
-                result={result}
-                onDownload={() => downloadBlob(result.blob, result.filename)}
-                onReset={resetAll}
-              />
-            )}
-          </>
-        ) : (
+        {busy ? <ToolProgress percent={percent} status={status} tool={tool} /> : null}
+        {!busy && result ? (
+          <ToolResult
+            tool={tool}
+            result={result}
+            onDownload={() => downloadBlob(result.blob, result.filename)}
+            onReset={resetAll}
+          />
+        ) : null}
+        {!busy && !result && !files.length ? (
+          <FileUploader files={files} onFiles={setFiles} onError={setError} />
+        ) : null}
+        {!busy && !result && files.length ? (
           <SignatureWorkspace
             file={files[0]}
             password={options.password}
             onCancel={resetAll}
+            onProgress={onProgress}
+            onBusy={setBusy}
             onComplete={(output) => {
               const url = URL.createObjectURL(output.blob);
+              setPercent(100);
+              setBusy(false);
               setResult({ ...output, url });
             }}
           />
-        )}
+        ) : null}
       </div>
     );
   }
 
   return (
     <div className="workspace">
-      <h2 style={{ marginTop: 0 }}>{tool.cta}</h2>
-      <p className="help">{tool.afterUpload}</p>
-      {(tool.slug === "pdf-to-word" || tool.slug === "pdf-to-excel" || tool.slug === "pdf-to-ebook") && (
-        <div className="alert alert-info">
-          <strong>Scanned pages</strong>
-          If a page has little or no embedded text, OCR runs in your browser. That is slower on iPhone, and English printed text works best. Check the download.
-        </div>
-      )}
+      {busy ? <ToolProgress percent={percent} status={status} tool={tool} /> : null}
 
-      <FileUploader
-        files={files}
-        onFiles={(next) => {
-          setFiles(next);
-          setResult(null);
-          setError(null);
-        }}
-        onError={setError}
-        multiple={tool.multiple}
-        accept={tool.accept}
-        label={tool.chooseLabel || (tool.multiple ? "Add files" : "Choose file")}
-        dropTitle={tool.dropTitle}
-        hint={tool.pickerHint}
-      />
-
-      {canRun && !result && (
-        <>
-          <OptionsPanel tool={tool} options={options} setOptions={setOptions} />
-          {(error?.code === "PASSWORD_REQUIRED" || error?.code === "INCORRECT_PASSWORD") && (
-            <label className="field">
-              PDF password
-              <input
-                type="password"
-                autoComplete="current-password"
-                value={options.password}
-                onChange={(event) => setOptions((current) => ({ ...current, password: event.target.value }))}
-              />
-            </label>
-          )}
-        </>
-      )}
-
-      {error && (
-        <div className="alert alert-error" role="alert">
-          <strong>{error.title}</strong>
-          <span>{error.hint}</span>
-        </div>
-      )}
-
-      {busy && (
-        <div className="status-panel" aria-live="polite">
-          <div className="spinner" aria-hidden="true" />
-          <strong>{status || "Processing…"}</strong>
-          <p className="help">Keep this page open until the file is ready.</p>
-        </div>
-      )}
-
-      {result && !busy && (
-        <ResultPanel
+      {!busy && result ? (
+        <ToolResult
+          tool={tool}
           result={result}
           onDownload={() => downloadBlob(result.blob, result.filename)}
           onReset={resetAll}
         />
-      )}
+      ) : null}
 
-      {canRun && !busy && !result && (
-        <div className="sticky-actions">
-          <button type="button" className="btn btn-primary btn-full" onClick={processFiles}>
-            {tool.cta}
-          </button>
-        </div>
-      )}
+      {!busy && !result ? (
+        <>
+          <h2 style={{ marginTop: 0 }}>{tool.cta}</h2>
+          <p className="help">{tool.afterUpload}</p>
+          {(tool.slug === "pdf-to-word" || tool.slug === "pdf-to-excel" || tool.slug === "pdf-to-ebook") && (
+            <div className="alert alert-info">
+              <strong>Scanned pages</strong>
+              If a page has little or no embedded text, OCR reads the page image in your browser. Printed English works best. Check the download.
+            </div>
+          )}
+
+          <FileUploader
+            files={files}
+            onFiles={(next) => {
+              setFiles(next);
+              setResult(null);
+              setError(null);
+            }}
+            onError={setError}
+            multiple={tool.multiple}
+            accept={tool.accept}
+            label={tool.chooseLabel || (tool.multiple ? "Add files" : "Choose file")}
+            dropTitle={tool.dropTitle}
+            hint={tool.pickerHint}
+          />
+
+          {canRun ? (
+            <>
+              <OptionsPanel tool={tool} options={options} setOptions={setOptions} />
+              {(error?.code === "PASSWORD_REQUIRED" || error?.code === "INCORRECT_PASSWORD") && (
+                <label className="field">
+                  PDF password
+                  <input
+                    type="password"
+                    autoComplete="current-password"
+                    value={options.password}
+                    onChange={(event) => setOptions((current) => ({ ...current, password: event.target.value }))}
+                  />
+                </label>
+              )}
+            </>
+          ) : null}
+
+          {error ? (
+            <div className="alert alert-error" role="alert">
+              <strong>{error.title}</strong>
+              <span>{error.hint}</span>
+            </div>
+          ) : null}
+
+          {canRun ? (
+            <div className="sticky-actions">
+              <button type="button" className="btn btn-primary btn-full" onClick={processFiles}>
+                {tool.cta}
+              </button>
+            </div>
+          ) : null}
+        </>
+      ) : null}
     </div>
   );
 }
@@ -376,35 +390,4 @@ function OptionsPanel({ tool, options, setOptions }) {
   }
 
   return null;
-}
-
-function ResultPanel({ result, onDownload, onReset }) {
-  const meta = result.meta || {};
-  let sizeNote = null;
-  if (typeof meta.originalSize === "number") {
-    sizeNote = meta.increased
-      ? `Compression did not reduce the file. Original ${formatBytes(meta.originalSize)} → ${formatBytes(meta.compressedSize)}.`
-      : `Original ${formatBytes(meta.originalSize)} → ${formatBytes(meta.compressedSize)} (${meta.reduction}% smaller).`;
-  }
-
-  return (
-    <div className="alert alert-ok">
-      <strong>Your file is ready</strong>
-      <p style={{ margin: "8px 0" }}>
-        {result.filename}
-        <br />
-        {result.blob?.type || result.mime} · {formatBytes(result.blob.size)}
-      </p>
-      {sizeNote && <p>{sizeNote}</p>}
-      {meta.note && <p>{meta.note}</p>}
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
-        <button type="button" className="btn btn-primary" onClick={onDownload}>
-          {meta.bundled ? "Download ZIP" : "Download"}
-        </button>
-        <button type="button" className="btn btn-secondary" onClick={onReset}>
-          Process another file
-        </button>
-      </div>
-    </div>
-  );
 }

@@ -8,6 +8,8 @@ export default function ToolExplain({ explain, related = [], relatedGuides = [],
   const how = explain.how || [];
   const faqs = explain.faqs || [];
   const problems = explain.problems || [];
+  const primaryGuide = relatedGuides.find((guide) => guide.primary) || (relatedGuides.length === 1 ? relatedGuides[0] : null);
+  const otherGuides = relatedGuides.filter((guide) => (primaryGuide ? guide.slug !== primaryGuide.slug : true));
 
   return (
     <div className="tool-explain">
@@ -168,11 +170,26 @@ export default function ToolExplain({ explain, related = [], relatedGuides = [],
         </section>
       ) : null}
 
-      {relatedGuides.length ? (
+      {primaryGuide ? (
         <section className="section">
-          <h2>Guides for this tool</h2>
+          <h2>Guide for this tool</h2>
+          <aside className="guide-cta">
+            <div>
+              <strong>{primaryGuide.title}</strong>
+              {primaryGuide.excerpt ? <p>{primaryGuide.excerpt}</p> : null}
+            </div>
+            <Link className="btn btn-primary" href={primaryGuide.path || guidePath(primaryGuide)}>
+              Read the guide
+            </Link>
+          </aside>
+        </section>
+      ) : null}
+
+      {otherGuides.length ? (
+        <section className="section">
+          <h2>Related guides</h2>
           <div className="stack-links">
-            {relatedGuides.map((guide) => (
+            {otherGuides.map((guide) => (
               <Link key={guide.id || guide.slug} href={guide.path || guidePath(guide)}>
                 {guide.title}
               </Link>

@@ -45,6 +45,11 @@ export default function Navbar({ publishedDeviceSlugs = [] }) {
     }
   }, [searchOpen]);
 
+  useEffect(() => {
+    document.body.classList.toggle("nav-open", open);
+    return () => document.body.classList.remove("nav-open");
+  }, [open]);
+
   function hoverOk() {
     return typeof window !== "undefined" && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   }
@@ -179,17 +184,22 @@ export default function Navbar({ publishedDeviceSlugs = [] }) {
           </Link>
           <button
             type="button"
-            className="menu-toggle"
+            className={`menu-toggle${open ? " open" : ""}`}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
+            aria-controls="mobile-menu"
             onClick={() => setOpen((value) => !value)}
           >
-            {open ? "Close" : "Menu"}
+            <span className="menu-toggle-bars" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </span>
           </button>
         </div>
       </div>
 
-      <div className={`mobile-menu${open ? " open" : ""}`}>
+      <div id="mobile-menu" className={`mobile-menu${open ? " open" : ""}`}>
         <p className="mobile-menu-label">Tools</p>
         {allTools.map((tool) => (
           <Link key={tool.slug} href={toolPath(tool.slug)} onClick={() => setOpen(false)}>

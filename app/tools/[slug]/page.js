@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import ToolPageView from "../../components/ToolPageView";
 import { getTool } from "@/lib/tools";
 import { toolMetadata } from "@/lib/seo";
-import { serializeGuideCard } from "@/lib/cms/guides";
 import { loadRelatedGuides, loadToolExplain } from "@/lib/explain-load";
 
 export const dynamic = "force-dynamic";
@@ -20,5 +19,5 @@ export default async function GenericToolPage({ params }) {
   if (!tool) notFound();
   const explain = await loadToolExplain(tool);
   const linked = await loadRelatedGuides(tool, explain);
-  return <ToolPageView tool={tool} explain={explain} relatedGuides={linked.map(serializeGuideCard)} />;
+  return <ToolPageView tool={tool} explain={explain} relatedGuides={linked} />;
 }

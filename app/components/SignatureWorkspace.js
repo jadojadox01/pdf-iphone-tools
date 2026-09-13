@@ -6,7 +6,7 @@ import { readFileBytes } from "@/lib/pdf/validate";
 import { signPdf } from "@/lib/pdf/sign";
 import { toToolError } from "@/lib/pdf/errors";
 
-export default function SignatureWorkspace({ file, password = "", onComplete, onCancel }) {
+export default function SignatureWorkspace({ file, password = "", onComplete, onCancel, onProgress, onBusy }) {
   const [pageCount, setPageCount] = useState(1);
   const [pageIndex, setPageIndex] = useState(0);
   const [previewUrl, setPreviewUrl] = useState("");
@@ -170,6 +170,7 @@ export default function SignatureWorkspace({ file, password = "", onComplete, on
       return;
     }
     setBusy(true);
+    onBusy?.(true);
     setError(null);
     try {
       const png = await fetch(signatureUrl).then((res) => res.arrayBuffer());
@@ -184,7 +185,10 @@ export default function SignatureWorkspace({ file, password = "", onComplete, on
           width: (box.w / 100) * pageSize.width,
           height: (box.h / 100) * pageSize.height,
         },
-        setStatus,
+        (message, meta) => {
+          setStatus(message);
+          onProgress?.(message, meta);
+        },
       );
       onComplete(output);
     } catch (err) {
@@ -192,6 +196,7 @@ export default function SignatureWorkspace({ file, password = "", onComplete, on
       setError({ title: converted.message, hint: converted.hint });
     } finally {
       setBusy(false);
+      onBusy?.(false);
     }
   }
 

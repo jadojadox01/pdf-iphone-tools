@@ -253,10 +253,69 @@ a:hover {
   display: none;
   width: 44px;
   height: 44px;
+  padding: 0;
   border: 1px solid var(--line);
   background: var(--card);
   border-radius: 10px;
+  color: var(--ink);
   cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-toggle:hover,
+.menu-toggle:focus-visible {
+  background: var(--bg);
+}
+
+.menu-toggle-bars {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 14px;
+}
+
+.menu-toggle-bars span {
+  position: absolute;
+  left: 0;
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transition: transform 0.2s ease, opacity 0.2s ease, top 0.2s ease;
+}
+
+.menu-toggle-bars span:nth-child(1) {
+  top: 0;
+}
+
+.menu-toggle-bars span:nth-child(2) {
+  top: 6px;
+}
+
+.menu-toggle-bars span:nth-child(3) {
+  top: 12px;
+}
+
+.menu-toggle.open .menu-toggle-bars span:nth-child(1) {
+  top: 6px;
+  transform: rotate(45deg);
+}
+
+.menu-toggle.open .menu-toggle-bars span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.open .menu-toggle-bars span:nth-child(3) {
+  top: 6px;
+  transform: rotate(-45deg);
+}
+
+@media (max-width: 860px) {
+  body.nav-open {
+    overflow: hidden;
+  }
 }
 
 .mobile-menu {
@@ -988,6 +1047,179 @@ h2 {
   }
 }
 
+.tool-progress {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 28px 8px 12px;
+  text-align: center;
+  animation: toolFadeUp 0.35s ease;
+}
+
+.tool-progress h2 {
+  margin: 8px 0 0;
+}
+
+.tool-progress-status {
+  margin: 0;
+  min-height: 1.5em;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.tool-progress-ring {
+  --progress: 0;
+  position: relative;
+  width: 132px;
+  height: 132px;
+  overflow: hidden;
+  color: var(--accent);
+}
+
+.tool-progress-ring svg {
+  display: block;
+  width: 132px;
+  height: 132px;
+  transform: rotate(-90deg);
+}
+
+.tool-progress-fill {
+  transition: stroke-dashoffset 0.35s ease;
+}
+
+.tool-progress-ring strong {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.55rem;
+}
+
+.tool-progress-bar {
+  width: min(100%, 420px);
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7edf6;
+}
+
+.tool-progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--coral));
+  transition: width 0.35s ease;
+}
+
+.tool-result {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 12px 4px 8px;
+  text-align: center;
+  animation: toolFadeUp 0.45s ease;
+}
+
+.tool-result h2 {
+  margin: 0;
+  max-width: 28rem;
+}
+
+.tool-result-check {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--ok-soft);
+  color: var(--ok);
+  animation: toolPop 0.5s cubic-bezier(0.2, 1.4, 0.3, 1);
+}
+
+.tool-result-file {
+  margin: 0;
+  color: var(--muted);
+}
+
+.tool-result-file span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.92rem;
+}
+
+.tool-result-actions {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 420px);
+  margin-top: 8px;
+}
+
+.tool-result-share {
+  width: 100%;
+  margin-top: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.tool-result-slogan {
+  margin: 0 0 6px;
+  font-weight: 800;
+}
+
+.tool-share-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tool-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.tool-share-btn:hover {
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+@keyframes toolFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toolPop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .sticky-actions {
   position: sticky;
   bottom: 0;
@@ -1030,7 +1262,7 @@ h2 {
   color: #333844;
 }
 
-.ribbon {
+.ribbon-pill {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
@@ -1039,6 +1271,7 @@ h2 {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  line-height: 1.2;
 }
 
 .ribbon-new {
@@ -2240,10 +2473,41 @@ body.word-writing {
 }
 
 .ribbon {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
   border-radius: 16px;
   padding: 16px 18px;
   margin: 20px 0;
   border: 1px solid var(--line);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1.65;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.ribbon strong {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.ribbon p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1.65;
+  text-transform: none;
+  overflow-wrap: anywhere;
 }
 
 .ribbon-info,
@@ -2946,7 +3210,7 @@ a.guide-extlink {
 }
 
 .tool-explain .ribbon p {
-  margin: 8px 0 0;
+  margin: 0;
 }
 
 .explain-example {
